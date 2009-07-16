@@ -1,0 +1,13 @@
+*RT SIMULATE*
+
+This program will show interactively how some real time algorithms work.
+
+[[http://dit.unitn.it/~abeni/RTOS/index.html][This]] is the official site, more information on laboratories [[http://dit.unitn.it/~abeni/RTOS/lab.html][here]].
+
+* Languages used
+  - python (for the gui)
+  - C/pyrex extension (for the algorithm engine)
+
+* Frameworks
+  - wxgtk/gtk/dialog?
+    
