@@ -1,13 +1,37 @@
 *RT SIMULATE*
 
 This program will show interactively how some real time algorithms work.
+It works as:
+1. insert a set of tasks
+2. choose a scheduling algorithm
+3. check if is schedulable or not
+
+Tasks are taken from the command line or from a configuration file.
 
 [[http://dit.unitn.it/~abeni/RTOS/index.html][This]] is the official site, more information on laboratories [[http://dit.unitn.it/~abeni/RTOS/lab.html][here]].
 
+Using a MVC pattern to design the application, which must be easily adapt to new algorithms and data types.
+
 * Languages used
-  - python (for the gui)
+  - python (for the gui and control interface)
   - C/pyrex extension (for the algorithm engine)
 
 * Frameworks
   - wxgtk/gtk/dialog?
+  - [[http://wiki.wxpython.org/How%20to%20Learn%20wxPython][How to learn wxpython]]
     
+* Language table
+
+  | Task | Schedulable entity |
+
+* Theory summary
+  OS kernel creates the illusion of multiple CPUs, concurrency is implemented by multiplexing tasks.
+  Tasks are associated to temporal constraints (*deadlines*)
+  
+  Scheduler is responsible for selecting the tasks to execute.
+  
+Algorithms:
+** STATIC scheduling algorithm
+   - Time axis divided in time slots
+   - Slots statically allocated to the tasks
+   - 
