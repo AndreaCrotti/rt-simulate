@@ -34,4 +34,9 @@ Algorithms:
 ** STATIC scheduling algorithm
    - Time axis divided in time slots
    - Slots statically allocated to the tasks
-   - 
+   - $\tau$ = *gcd*, $T$ = *lcm*
+   - Very simple implementation, no operating system needed
+
+     NOT VERY CLEAR HOW TO IMPLEMENT THIS, only frequency and timings in the slides.
+     What's the deadline in this case?
+     In general enough to fire a timer every *minor cycle*.
