@@ -22,7 +22,10 @@ Using a MVC pattern to design the application, which must be easily adapt to new
     
 * Language table
 
-  | Task | Schedulable entity |
+  |------------+------------------------------|
+  | Task       | Schedulable entity           |
+  | Preemptive | OS can regain control of cpu |
+  | WCET       |                              |
 
 * Theory summary
   OS kernel creates the illusion of multiple CPUs, concurrency is implemented by multiplexing tasks.
@@ -37,6 +40,42 @@ Algorithms:
    - $\tau$ = *gcd*, $T$ = *lcm*
    - Very simple implementation, no operating system needed
 
-     NOT VERY CLEAR HOW TO IMPLEMENT THIS, only frequency and timings in the slides.
+     *NOT VERY CLEAR HOW TO IMPLEMENT THIS, only frequencies and timings in the slides.*
      What's the deadline in this case?
      In general enough to fire a timer every *minor cycle*.
+
+** Fixed priority scheduling
+   Very simple /preemptive/ scheduling algorithm.
+   - every task has a fixed priority p_i
+   - active task with highest priority are scheduled
+
+     To have a better response of the system the priority must be chosen dynamically.
+     So the problem becomes, how to assign priorities to manage to have a schedulable set of tasks?
+
+** Dynamic priority scheduling algorithms:
+   Given a set, how to assign priorities?
+   Two possible objectives:
+   - schedulability
+   - response time
+      
+   - Given a set of tasks where all periods are equal to deadlines and offsets equal to 0.
+      ($\forall i, D_i = T_i
+     \forall i, r_i0 = 0$)
+     [[dead][deadline monotonic]] is the best choice
+
+   - Given a set of tasks where all periods are different from deadlines
+     [[rate][rate monotonic]] is the best choice
+     
+     If we consider periodic tasks with offsets, then /there is no optimal priority assignment possible/
+
+#<<dead>>
+*** Deadline monotonic
+    Shorter period $\rightarrow$ higher priority.
+
+#<<rate>>
+*** Rate monotonic
+    Shorter relative deadline $\rightarrow$ higher priority.
+
+** Analysis
+   Given a set of tasks, how can we make sure that is possible to schedule them?
+   
