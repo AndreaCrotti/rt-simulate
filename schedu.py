@@ -7,30 +7,34 @@ import math
 
 class TaskSet(object):
     """Defines a new taskset, takes as input a list of triples"""
-    def __init__(self, tasks):
-        if not(self.checkSet(tasks)):
-            raise "taskset not correct"
-
+    def __init__(self, tasks, priorities = {}):
         self.tasks = tasks
+        if not(self.checkSet()):
+            # FIXME: give the exact error, maybe move to parser?
+            print "wrong taskset, error in definition"
+            return False
+
         self.dim = len(self.tasks)
-        # creating a dictionary
-        t = ["tau" + str(i) for i in range(self.dim)]
-        self.task_dict = dict(zip(t, self.tasks))
-        self.priorities = dict(zip(t, [0] * self.dim))
-        self.dit = {}
-        keys = ['ci', 'di', 'ti']
-        # FIXME is that really needed??
-        for el, values in t, self.tasks :
-            self.dit[el] = {}
-            for i in range(len(keys)):
-                self.dit[el][keys[i]] = values[i]
-        
+        if priorities:
+            # then we choose a static algorithm
+            pass
+        else:
+            # choosing a dynamic algorithm 
+            pass
     
-    def checkSet(self, tasks):
+    def checkSet(self):
         """checking that the taskset is sound"""
-        # FIXME very ugly sorted(list)...
-        bools = [ sorted(list(x)) == list(x) for x in tasks ]
+        # FIXME: very ugly sorted(list)...
+        bools = [ sorted(list(x)) == list(x) for x in self.tasks ]
         return bools[0] == True and len(set(bools)) == 1
+
+    def schedule(self):
+        """Finally schedule the task set, only possible when the priorities are set"""
+        # Timeline is long as the hyperperiod, we go through it until we schedule everything
+        # Timeline is just a list long as the hyperperiod initially set to 0 and then filled with values
+        
+        
+        
 
     def ulub(self):
         """docstring for ulub"""
@@ -39,14 +43,18 @@ class TaskSet(object):
     def bigU(self):
         return sum([float(x[0]) / x[2] for x in self.tasks])
     
-    def is_schedulable(self):
+    def is_sched_rm(self):
         """test if the taskset can be schedulable,
-        When ulub < bigU < 1 we can't return anything"""
+        When ulub < bigU < 1 we can't return anything
+        1: schedulable
+        0: not schedulable
+        -1: don't know"""
         uAvg = self.bigU()
         if uAvg > 1:
-            return False
+            return 0
         elif uAvg < self.ulub():
-            return True
+            return 1
+        return (-1)
         
     def rate_monotonic(self):
         """Assigns priorities in rate monotonic, shorter period -> higher priority"""
@@ -61,9 +69,13 @@ class TaskSet(object):
         # while True:
         pass
         
+    def choose_algorithm(self):
+        """Analyze the task set to decide which algorithms works better"""
+        
+
     def major(self):
         """calculates the major cycle"""
-        
+        pass
             
 
 # some useful functions
@@ -105,5 +117,3 @@ def test_ulub(n):
 
 tset = [(2,3,4), (3,5,7)]
 prova =  TaskSet(tset)
-print prova.task_dict
-print prova.priorities
