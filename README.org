@@ -25,7 +25,7 @@ Using a MVC pattern to design the application, which must be easily adapt to new
   |------------+------------------------------|
   | Task       | Schedulable entity           |
   | Preemptive | OS can regain control of cpu |
-  | WCET       |                              |
+  | WCET       | Worst Case Execution Time    |
 
 * Theory summary
   OS kernel creates the illusion of multiple CPUs, concurrency is implemented by multiplexing tasks.
@@ -61,10 +61,10 @@ Algorithms:
    - Given a set of tasks where all periods are equal to deadlines and offsets equal to 0.
       ($\forall i, D_i = T_i
      \forall i, r_i0 = 0$)
-     [[dead][deadline monotonic]] is the best choice
+     [[rate][rate monotonic]] is the best choice
 
    - Given a set of tasks where all periods are different from deadlines
-     [[rate][rate monotonic]] is the best choice
+     [[dead][deadline monotonic]] is the best choice
      
      If we consider periodic tasks with offsets, then /there is no optimal priority assignment possible/
 
@@ -79,3 +79,31 @@ Algorithms:
 ** Analysis
    Given a set of tasks, how can we make sure that is possible to schedule them?
    
+   1. simulate the system to check if deadlines missed:
+      /hyperperiod/ ($H = lcm\{Ti\}$)
+      *The number can be very large*
+
+   2. *Utilisation analysis for RM*:
+      
+      Based on the utilisation bound, only works for deadline monotonic case (deadline = period)
+
+      Each task uses the processor:
+      $Ui = Ci/Ti$
+      
+      Total processor utilisation is:
+      $U = \sum_i Ci/Ti$
+      
+      So we get:
+      $U > 1 \rightarrow$ not schedulable
+      $U < Ulub \rightarrow$ schedulable
+      $U < 1 \rightarrow$ don't know, other checks needed
+
+      $Ulub = 1$ would be optimal
+
+   3. *Utilisation analysis for DM*:
+      In this case we consider
+      $U' = \sum_i Ci/Di$
+      $\tau = (C,D,D)$ is the worst possible case of $\tau = (C,D,T)$
+      So if one is satisfied the other is also satisfied
+      
+      This bound is very pessimistic.
