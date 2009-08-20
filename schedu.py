@@ -9,9 +9,9 @@ class Task(object):
     """ This class define a taks"""
     def __init__(self, name, cost, deadline, **other):
         self.task = dict(name = name, cost = cost, deadline = deadline)
-        self.done = False
         self.running = False
-        self.remaining = cost # what left to do
+        self.remaining = cost # what left to do for the task
+        self.done = lambda x: self.remaining > 0
         
         if other.has_key("period"):
             # then period != deadline, do something else here
@@ -35,13 +35,20 @@ class Task(object):
     def __str__(self):
         return str(self.task)
 
+    def __cmp__(self, y):
+        """ Reversing here the order"""
+        return (- cmp(self.task['priority'], y.task['priority']))
+
     def get_timers(self, limit, start = 0):
         return range(start, limit+1, self.task["deadline"])
 
 class TimeLine(object):
-    """Representing the timeline of a task set"""
+    """Representing the timeline of a task set
+    >>> t = TimeLine(10,20)
+    """
 
     def __init__(self, length, deadlines):
+        self.length = length
         self.timeline = [None for x in range(length)]
         self.deadlines = deadlines
         
@@ -50,9 +57,11 @@ class TimeLine(object):
 
     def add_task(self, name, start, cost):
         """ Try to add as much as possible of a task until the first deadline is reached
-        Returning the # of elements added"""
+        Returning the # of elements added """
         count = 0
         for idx in range(start, cost):
+            if idx >= self.length:
+                raise StopIteration # hyperperiod is over, tasks are scheduled
             if idx in self.deadlines:
                 break
             self.timeline[idx] = name
@@ -65,32 +74,47 @@ class TaskSet(object):
         """When dynamic false means that the priorities are fixed already"""
         self.tasks = tasks
 
-        self.dim = len(self.tasks)
-        if not dynamic:
-            # then we choose a static algorithm
-            pass
-        else:
-            # choosing a dynamic algorithm 
-            pass
-
     def __str__(self):
-        return str(self.tasks)
+        return str([ str(t) for t in self.tasks ])
     
+    def queue(self):
+        """ Returning a sorted priority list of unfinished jobs """
+        q = [ task for task in self.tasks if not (task.done)]
+        q.sort()
+        return q
+
+    def get_next(self):
+        return self.queue()[0]
+
     def schedule(self):
         """Finally schedule the task set, only possible when the priorities are set"""
         # Timeline is long as the hyperperiod, we go through it until we schedule everything
         # Timeline is just a list long as the hyperperiod initially set to 0 and then filled with tasks numbers
         hyper = self.hyper_period()
-        timeline = TimeLine(hyper)
         # a cycle where at every deadline we check again the priorities (preemption possible)
         
         timers = set(())
         for x in self.tasks:
             timers = timers.union(x.get_timers(hyper))
 
+        timeline = TimeLine(hyper, timers)
+
+        while True:
+            try:
+                q = self.queue()
+                if q:
+                    timeline.add_task(q[0])
+                else:
+                    # proceed to the next deadline
+                    # FIXME: Every time I have the deadline of one task you must RESET it!!
+                    timeline.jump_next_deadline()
+            except StopIteration:
+                print "finito"
+                print timeline
+
     def hyper_period(self):
         """Computes the hyper_period"""
-        periods = [x[2] for x in self.tasks]
+        periods = [x["period"] for x in self.tasks]
         return lcm(periods)
 
     def ulub(self):
@@ -172,5 +196,6 @@ def test_ulub(n):
     return s
 
 
-tset = [(2,3,4), (3,5,7)]
-prova =  TaskSet(tset)
+t1 = Task("uno", 2, 5)
+t2 = Task("due", 3, 5)
+prova =  TaskSet([t1, t2])
