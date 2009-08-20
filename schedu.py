@@ -6,6 +6,7 @@ import random
 from math import pow
 
 class Task(object):
+    """ This class define a taks"""
     def __init__(self, name, cost, deadline, **other):
         self.task = dict(name = name, cost = cost, deadline = deadline)
         self.done = False
@@ -19,6 +20,8 @@ class Task(object):
                 raise Exception, "not possible"
             else:
                 self.task["period"] = other["period"]
+        else:
+            self.task["period"] = self.task["deadline"]
             
         if other.has_key("priority"):
             # then fixed priorities
@@ -32,8 +35,32 @@ class Task(object):
     def __str__(self):
         return str(self.task)
 
+    def get_timers(self, limit, start = 0):
+        return range(start, limit+1, self.task["deadline"])
+
+class TimeLine(object):
+    """Representing the timeline of a task set"""
+
+    def __init__(self, length, deadlines):
+        self.timeline = [None for x in range(length)]
+        self.deadlines = deadlines
+        
+    def __str__(self):
+        return str(self.timeline)
+
+    def add_task(self, name, start, cost):
+        """ Try to add as much as possible of a task until the first deadline is reached
+        Returning the # of elements added"""
+        count = 0
+        for idx in range(start, cost):
+            if idx in self.deadlines:
+                break
+            self.timeline[idx] = name
+            count += 1
+        return count
+
 class TaskSet(object):
-    """Defines a new taskset, takes as input a list of dictionaries"""
+    """Defines a new taskset, takes as input a list of tasks"""
     def __init__(self, tasks, dynamic = True):
         """When dynamic false means that the priorities are fixed already"""
         self.tasks = tasks
@@ -47,24 +74,20 @@ class TaskSet(object):
             pass
 
     def __str__(self):
-        return ""
+        return str(self.tasks)
     
     def schedule(self):
         """Finally schedule the task set, only possible when the priorities are set"""
         # Timeline is long as the hyperperiod, we go through it until we schedule everything
         # Timeline is just a list long as the hyperperiod initially set to 0 and then filled with tasks numbers
         hyper = self.hyper_period()
-        timeline = [0 for x in range(hyper)]
+        timeline = TimeLine(hyper)
         # a cycle where at every deadline we check again the priorities (preemption possible)
         
-        ddlines = [x[1] for x in self.tasks]
         timers = set(())
-        for d in ddlines:
-            timers = timers.union(range(0, hyper + 1, d))
-        # when having the timers it's almost done
-        for idx in range(hyper):
-            control = 0
-        
+        for x in self.tasks:
+            timers = timers.union(x.get_timers(hyper))
+
     def hyper_period(self):
         """Computes the hyper_period"""
         periods = [x[2] for x in self.tasks]

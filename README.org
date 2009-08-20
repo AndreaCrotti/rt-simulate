@@ -113,5 +113,5 @@ Algorithms:
       Valid for an arbitrary assignment.
       Assumes periodic tasks with no offsets.
       
-      Critical instant: job $Ji,j$ is released at the same time with a job in every high priority task
+      *Critical instant*: job $Ji,j$ is released at the same time with a job in every high priority task
       
