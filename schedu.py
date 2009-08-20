@@ -1,44 +1,78 @@
 #!/usr/bin/env python
-# scheduler, every task is a triple (ci, deadline, period)
+# scheduler, every task is a dictionary like (name, cost, deadline, period, priority)
 # Implementing rate monotonic / dead line monotonic
 
 import random
-import math
+from math import pow
+
+class Task(object):
+    def __init__(self, name, cost, deadline, **other):
+        self.task = dict(name = name, cost = cost, deadline = deadline)
+        self.done = False
+        self.running = False
+        self.remaining = cost # what left to do
+        
+        if other.has_key("period"):
+            # then period != deadline, do something else here
+            per = other["period"]
+            if per < deadline:
+                raise Exception, "not possible"
+            else:
+                self.task["period"] = other["period"]
+            
+        if other.has_key("priority"):
+            # then fixed priorities
+            self.task["priority"] = other["priority"]
+        else:
+            self.task["priority"] = 0
+
+    def __getitem__(self, x):
+        return self.task[x]
+
+    def __str__(self):
+        return str(self.task)
 
 class TaskSet(object):
-    """Defines a new taskset, takes as input a list of triples"""
-    def __init__(self, tasks, priorities = {}):
+    """Defines a new taskset, takes as input a list of dictionaries"""
+    def __init__(self, tasks, dynamic = True):
+        """When dynamic false means that the priorities are fixed already"""
         self.tasks = tasks
-        if not(self.checkSet()):
-            # FIXME: give the exact error, maybe move to parser?
-            print "wrong taskset, error in definition"
-            return False
 
         self.dim = len(self.tasks)
-        if priorities:
+        if not dynamic:
             # then we choose a static algorithm
             pass
         else:
             # choosing a dynamic algorithm 
             pass
-    
-    def checkSet(self):
-        """checking that the taskset is sound"""
-        # FIXME: very ugly sorted(list)...
-        bools = [ sorted(list(x)) == list(x) for x in self.tasks ]
-        return bools[0] == True and len(set(bools)) == 1
 
+    def __str__(self):
+        return ""
+    
     def schedule(self):
         """Finally schedule the task set, only possible when the priorities are set"""
         # Timeline is long as the hyperperiod, we go through it until we schedule everything
-        # Timeline is just a list long as the hyperperiod initially set to 0 and then filled with values
+        # Timeline is just a list long as the hyperperiod initially set to 0 and then filled with tasks numbers
+        hyper = self.hyper_period()
+        timeline = [0 for x in range(hyper)]
+        # a cycle where at every deadline we check again the priorities (preemption possible)
         
+        ddlines = [x[1] for x in self.tasks]
+        timers = set(())
+        for d in ddlines:
+            timers = timers.union(range(0, hyper + 1, d))
+        # when having the timers it's almost done
+        for idx in range(hyper):
+            control = 0
         
-        
+    def hyper_period(self):
+        """Computes the hyper_period"""
+        periods = [x[2] for x in self.tasks]
+        return lcm(periods)
 
     def ulub(self):
         """docstring for ulub"""
-        return self.dim * (math.pow(self.dim, (1.0 / self.dim)) - 1)
+        return self.dim * (pow(self.dim, (1.0 / self.dim)) - 1)
         
     def bigU(self):
         return sum([float(x[0]) / x[2] for x in self.tasks])

@@ -107,3 +107,11 @@ Algorithms:
       So if one is satisfied the other is also satisfied
       
       This bound is very pessimistic.
+
+   4. *Response time analysis*:
+      Compute the /worst case response time/ for every task.
+      Valid for an arbitrary assignment.
+      Assumes periodic tasks with no offsets.
+      
+      Critical instant: job $Ji,j$ is released at the same time with a job in every high priority task
+      
