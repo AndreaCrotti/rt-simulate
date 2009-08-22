@@ -11,7 +11,8 @@ class Task(object):
         self.task = dict(name = name, cost = cost, deadline = deadline)
         self.running = False
         self.remaining = cost # what left to do for the task
-        self.done = lambda x: self.remaining > 0
+        self.done = lambda : self.remaining == 0
+        self.is_deadline = lambda x: x % self.task["deadline"] == 0
         
         if other.has_key("period"):
             # then period != deadline, do something else here
@@ -39,47 +40,51 @@ class Task(object):
         """ Reversing here the order"""
         return (- cmp(self.task['priority'], y.task['priority']))
 
+    def check_deadline(self, idx):
+        if self.is_deadline(idx):
+            print "reaching deadline, should not happen"
+            if not (self.done()):
+                print "error in %s, deadline reached but job not done" % self.task["name"]
+            else:
+                self.reset()
+
     def get_timers(self, limit, start = 0):
-        return range(start, limit+1, self.task["deadline"])
+        return range(start, limit + 1, self.task["deadline"])
+
+    def reset(self):
+        self.remaining = self.cost
 
 class TimeLine(object):
-    """Representing the timeline of a task set
-    >>> t = TimeLine(10,20)
-    """
+    """Representing the time line of events occurring in the hyperperiod """
 
-    def __init__(self, length, deadlines):
+    def __init__(self, length):
         self.length = length
         self.timeline = [None for x in range(length)]
-        self.deadlines = deadlines
         
     def __str__(self):
         return str(self.timeline)
 
-    def add_task(self, name, start, cost):
-        """ Try to add as much as possible of a task until the first deadline is reached
-        Returning the # of elements added """
-        count = 0
-        for idx in range(start, cost):
-            if idx >= self.length:
-                raise StopIteration # hyperperiod is over, tasks are scheduled
-            if idx in self.deadlines:
-                break
-            self.timeline[idx] = name
-            count += 1
-        return count
 
-class TaskSet(object):
-    """Defines a new taskset, takes as input a list of tasks"""
-    def __init__(self, tasks, dynamic = True):
-        """When dynamic false means that the priorities are fixed already"""
+class Scheduler(object):
+    def __init__(self, tasks):
         self.tasks = tasks
+        self.setup()
 
     def __str__(self):
         return str([ str(t) for t in self.tasks ])
     
+    def setup(self):
+        self.hyper = self.hyper_period()
+        self.timeline = Timeline(self.hyper) # faster methods?
+        self.schedule()
+
+    def add_task(self, task):
+        self.tasks.append(task)
+        self.setup()
+
     def queue(self):
         """ Returning a sorted priority list of unfinished jobs """
-        q = [ task for task in self.tasks if not (task.done)]
+        q = [ task for task in self.tasks if not (task.done())]
         q.sort()
         return q
 
@@ -90,27 +95,15 @@ class TaskSet(object):
         """Finally schedule the task set, only possible when the priorities are set"""
         # Timeline is long as the hyperperiod, we go through it until we schedule everything
         # Timeline is just a list long as the hyperperiod initially set to 0 and then filled with tasks numbers
-        hyper = self.hyper_period()
         # a cycle where at every deadline we check again the priorities (preemption possible)
         
-        timers = set(())
-        for x in self.tasks:
-            timers = timers.union(x.get_timers(hyper))
-
-        timeline = TimeLine(hyper, timers)
-
-        while True:
-            try:
-                q = self.queue()
-                if q:
-                    timeline.add_task(q[0])
-                else:
-                    # proceed to the next deadline
-                    # FIXME: Every time I have the deadline of one task you must RESET it!!
-                    timeline.jump_next_deadline()
-            except StopIteration:
-                print "finito"
-                print timeline
+        for i in range(self.hyper_period + 1):
+            # get a new task only when one deadline is found
+            recalc = False
+            for t in self.tasks:
+                if t.is_deadline(i):
+                    recalc = True # maybe set more than one time, not elegant
+                    t.reset()
 
     def hyper_period(self):
         """Computes the hyper_period"""
