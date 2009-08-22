@@ -52,7 +52,7 @@ class Task(object):
         return range(start, limit + 1, self.task["deadline"])
 
     def reset(self):
-        self.remaining = self.cost
+        self.remaining = self["cost"]
 
 class TimeLine(object):
     """Representing the time line of events occurring in the hyperperiod """
@@ -63,6 +63,9 @@ class TimeLine(object):
         
     def __str__(self):
         return str(self.timeline)
+
+    def assign(self, task, idx):
+        self.timeline[idx] = task
 
 
 class Scheduler(object):
@@ -75,7 +78,7 @@ class Scheduler(object):
     
     def setup(self):
         self.hyper = self.hyper_period()
-        self.timeline = Timeline(self.hyper) # faster methods?
+        self.timeline = TimeLine(self.hyper) # faster methods?
         self.schedule()
 
     def add_task(self, task):
@@ -97,13 +100,21 @@ class Scheduler(object):
         # Timeline is just a list long as the hyperperiod initially set to 0 and then filled with tasks numbers
         # a cycle where at every deadline we check again the priorities (preemption possible)
         
-        for i in range(self.hyper_period + 1):
+        # at time 0 all tasks starting
+        cur_task = self.get_next()
+
+        for i in range(self.hyper + 1):
             # get a new task only when one deadline is found
             recalc = False
             for t in self.tasks:
                 if t.is_deadline(i):
                     recalc = True # maybe set more than one time, not elegant
                     t.reset()
+            if recalc:
+                cur_task = self.get_next()
+
+            self.timeline.assign(cur_task["name"], i)
+            cur_task.remaining -= 1
 
     def hyper_period(self):
         """Computes the hyper_period"""
@@ -145,12 +156,19 @@ class Scheduler(object):
         
     def choose_algorithm(self):
         """Analyze the task set to decide which algorithms works better"""
-        
+        pass
 
     def major(self):
         """calculates the major cycle"""
         pass
-            
+    
+    # Analysis with the worst time response case, an iterative way to see if a task set is really schedulable
+    def wcrc():
+        """ Calculate the worst case response time """
+        pass
+
+    
+
 
 # some useful functions
 def lcm(nums):
@@ -191,4 +209,4 @@ def test_ulub(n):
 
 t1 = Task("uno", 2, 5)
 t2 = Task("due", 3, 5)
-prova =  TaskSet([t1, t2])
+prova =  Scheduler([t1, t2])
