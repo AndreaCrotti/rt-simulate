@@ -2,6 +2,8 @@
 # scheduler, every task is a dictionary like (name, cost, deadline, period, priority)
 # Implementing rate monotonic / dead line monotonic
 
+# TODO: 
+
 import random
 from math import pow
 
@@ -11,7 +13,7 @@ class Task(object):
         self.task = dict(name = name, cost = cost, deadline = deadline)
         self.running = False
         self.remaining = cost # what left to do for the task
-        self.done = lambda : self.remaining == 0
+        self.done = lambda : self.remaining <= 0
         self.is_deadline = lambda x: x % self.task["deadline"] == 0
         
         if other.has_key("period"):
@@ -34,7 +36,7 @@ class Task(object):
         return self.task[x]
 
     def __str__(self):
-        return str(self.task)
+        return str(self.task) + str(self.remaining)
 
     def __cmp__(self, y):
         """ Reversing here the order"""
@@ -64,9 +66,8 @@ class TimeLine(object):
     def __str__(self):
         return str(self.timeline)
 
-    def assign(self, task, idx):
-        self.timeline[idx] = task
-
+    def __setitem__(self, idx, val):
+        self.timeline[idx] = val
 
 class Scheduler(object):
     def __init__(self, tasks):
@@ -74,7 +75,7 @@ class Scheduler(object):
         self.setup()
 
     def __str__(self):
-        return str([ str(t) for t in self.tasks ])
+        return '\n'.join([ str(t) for t in self.tasks ])
     
     def setup(self):
         self.hyper = self.hyper_period()
@@ -103,18 +104,20 @@ class Scheduler(object):
         # at time 0 all tasks starting
         cur_task = self.get_next()
 
-        for i in range(self.hyper + 1):
+        for i in range(self.hyper):
             # get a new task only when one deadline is found
             recalc = False
             for t in self.tasks:
                 if t.is_deadline(i):
-                    recalc = True # maybe set more than one time, not elegant
+                    if not(t.done()):
+                        print "error error task %s is not finished before deadline" % t["name"]
                     t.reset()
-            if recalc:
-                cur_task = self.get_next()
+            
+            cur_task = self.get_next() # should not need every time
 
-            self.timeline.assign(cur_task["name"], i)
+            self.timeline[i] = cur_task["name"]
             cur_task.remaining -= 1
+        print self.timeline
 
     def hyper_period(self):
         """Computes the hyper_period"""
@@ -163,7 +166,7 @@ class Scheduler(object):
         pass
     
     # Analysis with the worst time response case, an iterative way to see if a task set is really schedulable
-    def wcrc():
+    def wcrc(task, task_set):
         """ Calculate the worst case response time """
         pass
 
@@ -199,14 +202,12 @@ def ulub(tasks):
     return (sum(m))
 
 
-def test_ulub(n):
+def gen_tasks(n):
     """test n tasks"""
-    s = []  
-    for i in range(n):
-        s.append((random.randrange(5), random.randrange(1,10), random.randrange(1,10)))
-    return s
+    s = [ Task(str(i), random.randrange(5), random.randrange(1, 10)) for i in range(n) ]
+    return Scheduler(s)
 
 
-t1 = Task("uno", 2, 5)
-t2 = Task("due", 3, 5)
+t1 = Task("uno", 2, 4, priority = 2)
+t2 = Task("due", 3, 5, priority = 4)
 prova =  Scheduler([t1, t2])
