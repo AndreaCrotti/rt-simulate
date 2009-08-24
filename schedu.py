@@ -166,11 +166,22 @@ class Scheduler(object):
         pass
     
     # Analysis with the worst time response case, an iterative way to see if a task set is really schedulable
-    def wcrc(task, task_set):
-        """ Calculate the worst case response time """
-        pass
+    def wcrt(self, idx):
+        """ Calculate the worst case response time of a particular task.
+        If for any task wcrt(i) > di then the task set is surely not schedulable """
+        from math import floor
 
-    
+        dead = self.tasks["deadline"]
+        cost = self.tasks["cost"]
+        
+        r = [self.tasks["cost"]] # r_i[0]
+        while True:
+            if r[-1] == r[-2]: # Insert check of list length
+                print "found fixed point"
+            if r[-1] <= dead:
+                print "not schedulable"
+
+            next_value = cost + sum([floor(r[idx] / 
 
 
 # some useful functions
