@@ -80,7 +80,8 @@ class Scheduler(object):
     def setup(self):
         self.hyper = self.hyper_period()
         self.timeline = TimeLine(self.hyper) # faster methods?
-        self.schedule()
+#        self.assign_priorities() Assign priorities based on task form
+#        self.schedule()
 
     def add_task(self, task):
         self.tasks.append(task)
@@ -171,18 +172,19 @@ class Scheduler(object):
         If for any task wcrt(i) > di then the task set is surely not schedulable """
         from math import floor
 
-        dead = self.tasks["deadline"]
-        cost = self.tasks["cost"]
+        dead = self.tasks[idx]["deadline"]
+        cost = self.tasks[idx]["cost"]
         
-        r = [self.tasks["cost"]] # r_i[0]
+        r = [ self.tasks[x]["cost"] for x in range(idx+1) ] # setting r_idx[0]
         while True:
+            next_value = cost + sum([int(floor(r[-1] / self.tasks[h]["deadline"])) for h in range(idx) ])
+            r.append(next_value)
             if r[-1] == r[-2]: # Insert check of list length
                 print "found fixed point"
-            if r[-1] <= dead:
-                print "not schedulable"
-
-            next_value = cost + sum([floor(r[idx] / 
-
+                return sum(r[:-1])
+            
+            if r[-1] > dead:
+                print "task %d not schedulable" % idx
 
 # some useful functions
 def lcm(nums):
@@ -222,3 +224,6 @@ def gen_tasks(n):
 t1 = Task("uno", 2, 4, priority = 2)
 t2 = Task("due", 3, 5, priority = 4)
 prova =  Scheduler([t1, t2])
+
+tasks = [Task("t1", 2, 5), Task("t2", 2, 9), Task("t3", 5, 20)]
+test_wc = Scheduler(tasks)
