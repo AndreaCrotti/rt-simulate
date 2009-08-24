@@ -1,10 +1,22 @@
 *RT SIMULATE*
 
+* TODO list
+
+** TODO implement the worst case response time algorithm
+
+** TODO write the graphical interface with wxWidget
+
+** TODO test deeply all the possible error conditions
+
+
+* General concepts
+
 This program will show interactively how some real time algorithms work.
 It works as:
-1. insert a set of tasks
+1. task a set of tasks as input
 2. choose a scheduling algorithm
 3. check if is schedulable or not
+4. return the scheduled hyperperiod if possible
 
 Tasks are taken from the command line or from a configuration file.
 
