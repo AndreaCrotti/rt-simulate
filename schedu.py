@@ -42,17 +42,6 @@ class Task(object):
         """ Reversing here the order"""
         return (- cmp(self.task['priority'], y.task['priority']))
 
-    def check_deadline(self, idx):
-        if self.is_deadline(idx):
-            print "reaching deadline, should not happen"
-            if not (self.done()):
-                print "error in %s, deadline reached but job not done" % self.task["name"]
-            else:
-                self.reset()
-
-    def get_timers(self, limit, start = 0):
-        return range(start, limit + 1, self.task["deadline"])
-
     def reset(self):
         self.remaining = self["cost"]
 
@@ -80,17 +69,27 @@ class Scheduler(object):
     def setup(self):
         self.hyper = self.hyper_period()
         self.timeline = TimeLine(self.hyper) # faster methods?
-#        self.assign_priorities() Assign priorities based on task form
-#        self.schedule()
+        self.sort_key = self.select_algorithm()
 
+    def hyper_period(self):
+        """Computes the hyper_period"""
+        periods = [x["period"] for x in self.tasks]
+        return lcm(periods)
+
+    def select_algorithm(self):
+        if any([t["deadline"] != t["period"] for t in self.tasks]):
+            return "deadline" # using deadline monotonic
+        else:
+            return "period" # using rate monotonic
+    
     def add_task(self, task):
         self.tasks.append(task)
-        self.setup()
+        self.setup() # Too much effort recalculating everything every time??
 
     def queue(self):
         """ Returning a sorted priority list of unfinished jobs """
         q = [ task for task in self.tasks if not (task.done())]
-        q.sort()
+        q.sort(key = lambda t: t[self.sort_key]) # sorting here because the algorithm could change adding new tasks
         return q
 
     def get_next(self):
@@ -101,7 +100,7 @@ class Scheduler(object):
         # Timeline is long as the hyperperiod, we go through it until we schedule everything
         # Timeline is just a list long as the hyperperiod initially set to 0 and then filled with tasks numbers
         # a cycle where at every deadline we check again the priorities (preemption possible)
-        
+
         # at time 0 all tasks starting
         cur_task = self.get_next()
 
@@ -119,11 +118,6 @@ class Scheduler(object):
             self.timeline[i] = cur_task["name"]
             cur_task.remaining -= 1
         print self.timeline
-
-    def hyper_period(self):
-        """Computes the hyper_period"""
-        periods = [x["period"] for x in self.tasks]
-        return lcm(periods)
 
     def ulub(self):
         """docstring for ulub"""
@@ -145,27 +139,6 @@ class Scheduler(object):
             return 1
         return (-1)
         
-    def rate_monotonic(self):
-        """Assigns priorities in rate monotonic, shorter period -> higher priority"""
-        pass
-    
-    def deadline_monotonic(self):
-        pass
-    
-    # Implementing the worst case execution analysis
-    def worstCase(self):
-        """Analyze the task set to check if schedulable or not"""
-        # while True:
-        pass
-        
-    def choose_algorithm(self):
-        """Analyze the task set to decide which algorithms works better"""
-        pass
-
-    def major(self):
-        """calculates the major cycle"""
-        pass
-    
     # Analysis with the worst time response case, an iterative way to see if a task set is really schedulable
     def worst_case_analysis(self):
         def wcrt(idx):
