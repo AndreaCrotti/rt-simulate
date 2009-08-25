@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 # scheduler, every task is a dictionary like (name, cost, deadline, period, priority)
-# Implementing rate monotonic / dead line monotonic
-
-# TODO: 
 
 import random
 from math import pow
@@ -11,7 +8,6 @@ class Task(object):
     """ This class define a taks"""
     def __init__(self, name, cost, deadline, **other):
         self.task = dict(name = name, cost = cost, deadline = deadline)
-        self.running = False
         self.remaining = cost # what left to do for the task
         self.done = lambda : self.remaining <= 0
         self.is_deadline = lambda x: x % self.task["deadline"] == 0
@@ -38,12 +34,14 @@ class Task(object):
     def __str__(self):
         return str(self.task) + "\tremaining: " + str(self.remaining)
 
-    def __cmp__(self, y):
-        """ Reversing here the order"""
-        return (- cmp(self.task['priority'], y.task['priority']))
-
     def reset(self):
         self.remaining = self["cost"]
+
+    # CHANGED: Not needed anymore using the sorting key in the scheduler
+    #     def __cmp__(self, y):
+    #         """ Reversing here the order"""
+    #         return (- cmp(self.task['priority'], y.task['priority']))
+
 
 class TimeLine(object):
     """Representing the time line of events occurring in the hyperperiod """
@@ -93,7 +91,11 @@ class Scheduler(object):
         return q
 
     def get_next(self):
-        return self.queue()[0]
+        q = self.queue()
+        if len(q) >= 1:
+            return q[0]
+        else:
+            return None
 
     def schedule(self):
         """Finally schedule the task set, only possible when the priorities are set"""
@@ -114,6 +116,8 @@ class Scheduler(object):
                     t.reset()
             
             cur_task = self.get_next() # should not need every time
+            if not(cur_task):
+                continue # just go to the next position on the timeline
 
             self.timeline[i] = cur_task["name"]
             cur_task.remaining -= 1
@@ -193,14 +197,10 @@ def ulub(tasks):
 
 
 def gen_tasks(n):
-    """test n tasks"""
+    """Generate n tasks"""
     s = [ Task(str(i), random.randrange(5), random.randrange(1, 10)) for i in range(n) ]
     return Scheduler(s)
 
-
-t1 = Task("uno", 2, 4, priority = 2)
-t2 = Task("due", 3, 5, priority = 4)
-prova =  Scheduler([t1, t2])
 
 tasks = [Task("t1", 2, 5), Task("t2", 2, 9), Task("t3", 5, 20)]
 test_wc = Scheduler(tasks)
