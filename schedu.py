@@ -36,7 +36,7 @@ class Task(object):
         return self.task[x]
 
     def __str__(self):
-        return str(self.task) + str(self.remaining)
+        return str(self.task) + "\tremaining: " + str(self.remaining)
 
     def __cmp__(self, y):
         """ Reversing here the order"""
@@ -167,24 +167,28 @@ class Scheduler(object):
         pass
     
     # Analysis with the worst time response case, an iterative way to see if a task set is really schedulable
-    def wcrt(self, idx):
-        """ Calculate the worst case response time of a particular task.
-        If for any task wcrt(i) > di then the task set is surely not schedulable """
-        from math import floor
+    def worst_case_analysis(self):
+        def wcrt(idx):
+            """ Calculate the worst case response time of a particular task.
+            If for any task wcrt(i) > di then the task set is surely not schedulable """
+            from math import floor
 
-        dead = self.tasks[idx]["deadline"]
-        cost = self.tasks[idx]["cost"]
-        
-        r = [ self.tasks[x]["cost"] for x in range(idx+1) ] # setting r_idx[0]
-        while True:
-            next_value = cost + sum([int(floor(r[-1] / self.tasks[h]["deadline"])) for h in range(idx) ])
-            r.append(next_value)
-            if r[-1] == r[-2]: # Insert check of list length
-                print "found fixed point"
-                return sum(r[:-1])
-            
-            if r[-1] > dead:
+            cost = self.tasks[idx]["cost"]
+
+            r = [ self.tasks[x]["cost"] for x in range(idx+1) ] # setting r_idx[0]
+            while True:
+                next_value = cost +\
+                             sum([int(floor(r[-1] / self.tasks[h]["deadline"])) for h in range(idx) ])
+                r.append(next_value)
+                if r[-1] == r[-2]: # Insert check of list length
+                    return sum(r[:-1])
+
+        for i in range(len(self.tasks)):
+            w = wcrt(i)
+            if w > self.tasks[i]["deadline"]:
                 print "task %d not schedulable" % idx
+            print "task %d has wcrt = %d" % (i, w)
+            
 
 # some useful functions
 def lcm(nums):
