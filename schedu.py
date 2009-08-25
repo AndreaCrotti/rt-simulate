@@ -2,7 +2,7 @@
 # scheduler, every task is a dictionary like (name, cost, deadline, period, priority)
 
 import random
-from math import pow
+from math import pow, floor
 
 class Task(object):
     """ This class define a taks"""
@@ -37,21 +37,16 @@ class Task(object):
     def reset(self):
         self.remaining = self["cost"]
 
-    # CHANGED: Not needed anymore using the sorting key in the scheduler
-    #     def __cmp__(self, y):
-    #         """ Reversing here the order"""
-    #         return (- cmp(self.task['priority'], y.task['priority']))
-
-
 class TimeLine(object):
     """Representing the time line of events occurring in the hyperperiod """
 
     def __init__(self, length):
         self.length = length
         self.timeline = [None for x in range(length)]
+        self.limit = 80
         
     def __str__(self):
-        return str(self.timeline)
+        return ' '.join(map(str, enumerate(self.timeline)))
 
     def __setitem__(self, idx, val):
         self.timeline[idx] = val
@@ -104,6 +99,10 @@ class Scheduler(object):
         # a cycle where at every deadline we check again the priorities (preemption possible)
 
         # at time 0 all tasks starting
+        if not(self.is_schedulable()):
+            print "impossible to schedule"
+            return
+        
         cur_task = self.get_next()
 
         for i in range(self.hyper):
@@ -130,26 +129,35 @@ class Scheduler(object):
     def bigU(self):
         return sum([float(x[0]) / x[2] for x in self.tasks])
     
+    def is_schedulable(self):
+        if self.sort_key == "period":
+            s = self.is_sched_rm()
+            if s == None:
+                return self.worst_case_analysis()
+            else:
+                return s
+        else:
+            return self.worst_case_analysis()
+            # deadline monotonic case
+
     def is_sched_rm(self):
         """test if the taskset can be schedulable,
         When ulub < bigU < 1 we can't return anything
-        1: schedulable
-        0: not schedulable
-        -1: don't know"""
+        True: schedulable
+        False: not schedulable
+        None: don't know"""
         uAvg = self.bigU()
         if uAvg > 1:
-            return 0
+            return False
         elif uAvg < self.ulub():
-            return 1
-        return (-1)
+            return True
+        return None
         
     # Analysis with the worst time response case, an iterative way to see if a task set is really schedulable
     def worst_case_analysis(self):
         def wcrt(idx):
             """ Calculate the worst case response time of a particular task.
             If for any task wcrt(i) > di then the task set is surely not schedulable """
-            from math import floor
-
             cost = self.tasks[idx]["cost"]
 
             r = [ self.tasks[x]["cost"] for x in range(idx+1) ] # setting r_idx[0]
@@ -163,9 +171,10 @@ class Scheduler(object):
         for i in range(len(self.tasks)):
             w = wcrt(i)
             if w > self.tasks[i]["deadline"]:
-                print "task %d not schedulable" % idx
-            print "task %d has wcrt = %d" % (i, w)
-            
+                print "task %s not schedulable" % self.tasks[i]["name"]
+                return False
+            print "task %s has wcrt = %d" % (self.tasks[i]["name"], w)
+        return True
 
 # some useful functions
 def lcm(nums):
@@ -202,5 +211,10 @@ def gen_tasks(n):
     return Scheduler(s)
 
 
-tasks = [Task("t1", 2, 5), Task("t2", 2, 9), Task("t3", 5, 20)]
-test_wc = Scheduler(tasks)
+tasks_rm = [Task("t1", 2, 5), Task("t2", 2, 9), Task("t3", 5, 20)]
+test_rm = Scheduler(tasks_rm)
+test_rm.schedule()
+
+tasks_dm = [Task("t1", 1, 4, period = 4), Task("t2", 4, 6, period = 15), Task("t3", 3, 6, period = 10)]
+test_dm = Scheduler(tasks_dm)
+test_dm.schedule()
