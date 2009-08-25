@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# scheduler, every task is a dictionary like (name, cost, deadline, period, priority)
 
 import random
 from math import pow, floor
@@ -7,7 +6,7 @@ from math import pow, floor
 class Task(object):
     """ This class define a taks"""
     def __init__(self, name, cost, deadline, **other):
-        self.task = dict(name = name, cost = cost, deadline = deadline)
+        self.task = dict(name = name, cost = cost, deadline = deadline, period = None)
         self.remaining = cost # what left to do for the task
         self.done = lambda : self.remaining <= 0
         self.is_deadline = lambda x: x % self.task["deadline"] == 0
@@ -22,12 +21,6 @@ class Task(object):
         else:
             self.task["period"] = self.task["deadline"]
             
-        if other.has_key("priority"):
-            # then fixed priorities
-            self.task["priority"] = other["priority"]
-        else:
-            self.task["priority"] = 0
-
     def __getitem__(self, x):
         return self.task[x]
 
