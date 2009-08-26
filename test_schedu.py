@@ -6,6 +6,9 @@ import os
 import unittest
 from schedu import *
 
+test_rm = [Task("t1", 2, 5), Task("t2", 2, 9), Task("t3", 5, 20)]
+test_rm_easy = [Task("t1", 1, 5), Task("t2", 3, 4)]
+test_dm = [Task("t1", 1, 4, 4), Task("t2", 4, 6, 15), Task("t3", 3, 6, 10)]
 
 class TestTask(unittest.TestCase):
     def setUp(self):

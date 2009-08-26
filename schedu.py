@@ -1,20 +1,23 @@
 #!/usr/bin/env python
+# TODO: write the logging mechanism
+# TODO: write a better error handling (exceptions)
 
 import random
+import logging
 from math import pow, floor
 
 class Task(object):
     """ This class define a taks"""
     def __init__(self, name, cost, deadline, period = None):
         if not period:
-            self.task["period"] = self.task["deadline"]
+            period = deadline
         else:
             if period < deadline:
                 print "error, period must be greater or equal to deadline"
                 
         self.task = dict(name = name, cost = cost, deadline = deadline, period = period)
         self.remaining = cost # what left to do for the task
-        # two inline functions useful later
+        # two inline functions useful later:
         self.done = lambda : self.remaining <= 0
         self.is_deadline = lambda x: x % self.task["deadline"] == 0
             
@@ -33,7 +36,6 @@ class TimeLine(object):
     def __init__(self, length):
         self.length = length
         self.timeline = [None for x in range(length)]
-        self.limit = 80
         
     def __str__(self):
         return ' '.join(map(str, enumerate(self.timeline)))
@@ -114,10 +116,11 @@ class Scheduler(object):
 
     def ulub(self):
         """docstring for ulub"""
-        return self.dim * (pow(self.dim, (1.0 / self.dim)) - 1)
+        dim = len(self.tasks)
+        return dim * (pow(dim, (1.0 / dim)) - 1)
         
     def bigU(self):
-        return sum([float(x[0]) / x[2] for x in self.tasks])
+        return sum([float(x["cost"]) / x["period"] for x in self.tasks])
     
     def is_schedulable(self):
         if self.sort_key == "period":
@@ -205,6 +208,6 @@ tasks_rm = [Task("t1", 2, 5), Task("t2", 2, 9), Task("t3", 5, 20)]
 test_rm = Scheduler(tasks_rm)
 test_rm.schedule()
 
-tasks_dm = [Task("t1", 1, 4, period = 4), Task("t2", 4, 6, period = 15), Task("t3", 3, 6, period = 10)]
+tasks_dm = [Task("t1", 1, 4, 4), Task("t2", 4, 6, 15), Task("t3", 3, 6, 10)]
 test_dm = Scheduler(tasks_dm)
 test_dm.schedule()
