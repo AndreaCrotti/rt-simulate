@@ -68,7 +68,7 @@ class Scheduler(object):
 
     def hyper_period(self):
         """Computes the hyper_period"""
-        periods = [x["period"] for x in self.tasks]
+        periods = [ x["period"] for x in self.tasks ]
         return lcm_list(periods)
 
     def select_algorithm(self):
@@ -85,7 +85,7 @@ class Scheduler(object):
 
     def queue(self):
         """ Returning a sorted priority list of unfinished jobs """
-        q = [ task for task in self.tasks if not (task.done())]
+        q = [ task for task in self.tasks if not (task.done()) ]
         q.sort(key = lambda t: t[self.sort_key]) # sorting here because the algorithm could change adding new tasks
         return q
 
