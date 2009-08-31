@@ -9,8 +9,6 @@ from math import pow, floor
 
 from errors import *
 
-logging.basicConfig(stream=sys.stdout)
-
 class Task(object):
     """ This class define a taks"""
     def __init__(self, name, cost, deadline, period = None):
@@ -51,7 +49,7 @@ class TimeLine(object):
         self.timeline = [None for x in range(length)]
         
     def __str__(self):
-        return ' '.join(map(str, enumerate(self.timeline)))
+        return ', '.join(map(str, self.timeline))
     
     def __setitem__(self, idx, val):
         self.timeline[idx] = val
@@ -121,7 +119,10 @@ class Scheduler(object):
             for t in self.tasks:
                 if t.is_deadline(i):
                     if not(t.is_done()):
-                        logging.error("at time %d error error task %s is not finished before deadline" % (i, t["name"]))
+                        err = "at time %d error error task %s is not finished before deadline\n" % (i, t["name"]) +\
+                              "temp timeline is = %s" % str(self.timeline)
+                        logging.error(err)
+                        return False
                     t.reset()
             
             cur_task = self.get_next() # should not need every time
@@ -130,38 +131,42 @@ class Scheduler(object):
 
             self.timeline[i] = cur_task["name"]
             cur_task.remaining -= 1
+        return True
 
-    def ulub(self):
-        """docstring for ulub"""
-        dim = len(self.tasks)
-        return dim * (pow(dim, (1.0 / dim)) - 1)
-        
-    def bigU(self):
+    def utilisation_bound(self):
         return sum([float(x["cost"]) / x["period"] for x in self.tasks])
     
     def is_schedulable(self):
         if self.sort_key == "period":
-            
             s = self.is_sched_rm()
             if s == None:
+                logging.info("necessary to analyze the worst case response")
                 return self.worst_case_analysis()
             else:
                 return s
         else:
+            # in the deadline monotonic we only use the wcrt
             return self.worst_case_analysis()
-            # deadline monotonic case
 
     def is_sched_rm(self):
         """test if the taskset can be schedulable,
-        When ulub < bigU < 1 we can't return anything
+        When ulub < utilisation_bound < 1 we can't return anything
         True: schedulable
         False: not schedulable
         None: don't know"""
-        uAvg = self.bigU()
-        if uAvg > 1:
+        u_least = ulub(len(self.tasks))
+        u_bound = self.utilisation_bound()
+        
+        logging.debug("ulub = %f, ubound = %f" % (u_least, u_bound))
+
+        if u_bound > 1:
+            logging.info("Task set with U > 1 is never schedulable")
             return False
-        elif uAvg < self.ulub():
+
+        elif u_least < ulub(len(self.tasks)):
+            logging.info("it's surely schedulable")
             return True
+        
         return None
         
     # Analysis with the worst time response case, an iterative way to see if a task set is really schedulable
@@ -181,10 +186,13 @@ class Scheduler(object):
 
         for i in range(len(self.tasks)):
             w = wcrt(i)
+
             if w > self.tasks[i]["deadline"]:
-                print "task %s not schedulable" % self.tasks[i]["name"]
+                # we stop when we find the first task not schedulable
+                logging.info("task %s not schedulable" % self.tasks[i]["name"])
                 return False
-            print "task %s has wcrt = %d" % (self.tasks[i]["name"], w)
+            
+            logging.debug("task %s has wcrt = %d" % (self.tasks[i]["name"], w))
         return True
 
 def lcm_list(nums):
@@ -208,8 +216,12 @@ def gcd(a, b):
         else:
             return gcd(b, a % b)
 
+def ulub(dim):
+    """ Least upper bound, only depending on the length"""
+    return dim * (pow(2, (1.0 / dim)) - 1)
+
 def gen_harmonic(k, dim):
-    """ Generate a n-dimension harmonic test, which must be schedulable and bigU = 1"""
+    """ Generate a n-dimension harmonic test, which must be schedulable and utilisation_bound = 1"""
     t = []
     for i in range(dim - 1):
         name = "t" + str(i)

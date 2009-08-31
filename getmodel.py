@@ -25,7 +25,7 @@ def load_tasksets(config):
             try:
                 task = Task(j, *vals) # automatically handle the different possible input type with *
             except InputError:
-                print "task %s is not correct" % (":".join([s, j]))
+                logging.info("task %s is not correct" % (":".join([s, j])))
             else:
                 tset.append(task)
 
@@ -34,17 +34,18 @@ def load_tasksets(config):
 
 if __name__ == '__main__':
     opts, args = getopt.getopt(sys.argv[1:], "dvhc:g", ["debug", "verbose", "help", "conf", "gui"])
+
     for o, a in opts:
         if o == "-v":
-            # the verbosity should be handled with Logging
-            # in this way also using the GUI is fine
-            logging.setLevel(logging.INFO)
+            logging.getLogger().setLevel(logging.INFO)
         if o == "-h":
             usage()
         if o == "-c":
             CONF_FILE = a
         if o == "-g":
             GUI = True
+        if o == "-d":
+            logging.getLogger().setLevel(logging.DEBUG)
 
     # then finally start the engine, both frontends are working on the same
     # data and the same algorithms
@@ -54,7 +55,4 @@ if __name__ == '__main__':
         from cli import run
         
         l = load_tasksets(CONF_FILE)
-        for k, v in l.items():
-            print k, v
-
         run(l)
