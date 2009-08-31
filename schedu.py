@@ -177,10 +177,12 @@ class Scheduler(object):
             cost = self.tasks[idx]["cost"]
 
             r = [ self.tasks[x]["cost"] for x in range(idx + 1) ] # setting r_idx[0]
+            # FIXME: bug in the implementation of the wcrt algorithm!
             while True:
                 next_value = cost +\
                              sum([int(floor(r[-1] / self.tasks[h]["deadline"])) for h in range(idx) ])
                 r.append(next_value)
+                logging.debug("list: %s" % str(r))
                 if r[-1] == r[-2]: # Insert check of list length
                     return sum(r[:-1])
 
