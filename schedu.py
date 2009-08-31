@@ -4,18 +4,21 @@
 
 import random
 import logging
+import sys
 from math import pow, floor
 
 from errors import *
+
+logging.basicConfig(stream=sys.stdout)
 
 class Task(object):
     """ This class define a taks"""
     def __init__(self, name, cost, deadline, period = None):
         if not period:
             period = deadline
-        self.check()
-
+        self.check(period, deadline)
         self.task = dict(name = name, cost = cost, deadline = deadline, period = period)
+
         self.remaining = cost # what left to do for the task
         # two inline functions useful later:
         self.done = lambda : self.remaining <= 0
@@ -29,7 +32,11 @@ class Task(object):
 
     def check(self, period, deadline):
         if period < deadline:
-            raise InputError("period must be greater or equal to deadline")
+            err = "period must be greater or equal to deadline"
+            logging.error(err)
+            # in debug all the info
+            logging.debug("error on object" + str(self))
+            raise InputError(err)
         
     def reset(self):
         self.remaining = self["cost"]
@@ -63,7 +70,7 @@ class Scheduler(object):
     def hyper_period(self):
         """Computes the hyper_period"""
         periods = [x["period"] for x in self.tasks]
-        return list_lcm(periods)
+        return lcm_list(periods)
 
     def select_algorithm(self):
         if any([t["deadline"] != t["period"] for t in self.tasks]):
@@ -174,12 +181,12 @@ class Scheduler(object):
             print "task %s has wcrt = %d" % (self.tasks[i]["name"], w)
         return True
 
-def list_lcm(nums):
+def lcm_list(nums):
     """Calculates the lcm given a list of integers"""
     if len(nums) == 1:
         return nums[0]
     else:
-        snd = list_lcm(nums[1:])
+        snd = lcm_list(nums[1:])
         fst = nums[0]
         return ((fst * snd) / (gcd(fst, snd)))
 
@@ -195,10 +202,14 @@ def gcd(a, b):
         else:
             return gcd(b, a % b)
 
-def gen_tasks(n):
-    """Generate n tasks"""
-    s = [ Task(str(i), random.randrange(5), random.randrange(1, 10)) for i in range(n) ]
-    return Scheduler(s)
+def gen_harmonic(k, dim):
+    """ Generate a n-dimension harmonic test, which must be schedulable and bigU = 1"""
+    t = []
+    for i in range(dim - 1):
+        name = "t" + str(i)
+        t.append(Task(name, 1, pow(2, i)))
+    # fix here and use the right equation to find the rest (reaching 1)
+    t.append(Task("t" + str(i), 1, pow(2, i)))
 
 
 tasks_rm = [Task("t1", 2, 5), Task("t2", 2, 9), Task("t3", 5, 20)]
