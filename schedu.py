@@ -16,7 +16,14 @@ class Task(object):
     def __init__(self, name, cost, deadline, period = None):
         if not period:
             period = deadline
-        self.check(period, deadline)
+
+        elif period < deadline:
+            err = "period must be greater or equal to deadline"
+            logging.error(err)
+            # in debug all the info
+            logging.debug("error on object" + "\t,".join(map(str, [name, cost, deadline, period])))
+            raise InputError(err)
+        
         self.task = dict(name = name, cost = cost, deadline = deadline, period = period)
 
         self.remaining = cost # what left to do for the task
@@ -29,14 +36,6 @@ class Task(object):
 
     def __str__(self):
         return str(self.task) + "\tremaining: " + str(self.remaining)
-
-    def check(self, period, deadline):
-        if period < deadline:
-            err = "period must be greater or equal to deadline"
-            logging.error(err)
-            # in debug all the info
-            logging.debug("error on object" + str(self))
-            raise InputError(err)
         
     def reset(self):
         self.remaining = self["cost"]
@@ -103,7 +102,7 @@ class Scheduler(object):
 
         # at time 0 all tasks starting
         if not(self.is_schedulable()):
-            print "impossible to schedule"
+            logging.info("this task set is impossible to schedule")
             return
         
         cur_task = self.get_next()
@@ -114,7 +113,7 @@ class Scheduler(object):
             for t in self.tasks:
                 if t.is_deadline(i):
                     if not(t.done()):
-                        print "error error task %s is not finished before deadline" % t["name"]
+                        logging.error("error error task %s is not finished before deadline" % t["name"])
                     t.reset()
             
             cur_task = self.get_next() # should not need every time
@@ -123,7 +122,6 @@ class Scheduler(object):
 
             self.timeline[i] = cur_task["name"]
             cur_task.remaining -= 1
-        print self.timeline
 
     def ulub(self):
         """docstring for ulub"""

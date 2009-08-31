@@ -23,7 +23,13 @@ def load_conf(config):
         tset = []
         for j, v in c.items(s):
             vals = map(int, map(strip, v.split(',')))
-            tset.append(Task(j, *vals)) # automatically handle the different possible input type
+            try:
+                task = Task(j, *vals) # automatically handle the different possible input type with *
+            except InputError:
+                print "task is not correct"
+                break
+            else:
+                tset.append(task)
 
         whole[s] = Scheduler(tset)
     return whole

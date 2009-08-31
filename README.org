@@ -1,12 +1,13 @@
 *RT SIMULATE*
 
-* TODO list
+* DONE implement the worst case response time algorithm
+  CLOSED: [2009-08-31 Mon 09:31]
+  - CLOSING NOTE [2009-08-31 Mon 09:31] \\
+    Algorithm working on simple cases
 
-** TODO implement the worst case response time algorithm
+* TODO write the graphical interface with wxWidget
 
-** TODO write the graphical interface with wxWidget
-
-** TODO test deeply all the possible error conditions
+* TODO test deeply all the possible error conditions
 
 
 * General concepts
@@ -19,6 +20,11 @@ It works as:
 4. return the scheduled hyperperiod if possible
 
 Tasks are taken from the command line or from a configuration file.
+
+In plus there will be an interactive modality (cli or GUI) where those operations should be possible:
+- add a new task
+- remove a task
+- see the timeline
 
 [[http://dit.unitn.it/~abeni/RTOS/index.html][This]] is the official site, more information on laboratories [[http://dit.unitn.it/~abeni/RTOS/lab.html][here]].
 
