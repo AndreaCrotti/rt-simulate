@@ -3,6 +3,10 @@
 import os, sys, getopt, logging
 import ConfigParser
 
+from schedu import *
+
+DEFAULTCONF = "example.conf"
+CONF_FILE = DEFAULTCONF
 VERBOSE = False
 GUI = False
 CONF = None
@@ -12,14 +16,17 @@ logging.basicConfig(stream = sys.stdout)
 def load_conf(config):
     "Load a configuration file into the right data structure"
     from string import strip
-    conf = {}
     c = ConfigParser.ConfigParser()
     c.read(config)
-    conf["alg"] = c.get("alg", "default")
-    conf["jobs"] = []
-    for j, vals in c.items("jobs"):
-        conf["jobs"].append(map(strip, vals.split(',')))
-    return conf
+    whole = {}
+    for s in c.sections():
+        tset = []
+        for j, v in c.items(s):
+            vals = map(int, map(strip, v.split(',')))
+            tset.append(Task(j, *vals)) # automatically handle the different possible input type
+
+        whole[s] = Scheduler(tset)
+    return whole
 
 def parse_conf(args):
     pass
@@ -35,7 +42,7 @@ if __name__ == '__main__':
         if o == "-h":
             usage()
         if o == "-c":
-            CONF = load_conf(a)
+            CONF_FILE = a
         if o == "-g":
             GUI = True
 
@@ -47,8 +54,7 @@ if __name__ == '__main__':
         # initial configuration passed
     else:
         from cli import run
-        if not CONF:
-            CONF = parse_conf(args)
-
-    print CONF
-    run(CONF)
+        
+        l = load_conf(CONF_FILE)
+        for k, v in l.items():
+            print k, v

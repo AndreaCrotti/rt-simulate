@@ -210,12 +210,3 @@ def gen_harmonic(k, dim):
         t.append(Task(name, 1, pow(2, i)))
     # fix here and use the right equation to find the rest (reaching 1)
     t.append(Task("t" + str(i), 1, pow(2, i)))
-
-
-tasks_rm = [Task("t1", 2, 5), Task("t2", 2, 9), Task("t3", 5, 20)]
-test_rm = Scheduler(tasks_rm)
-test_rm.schedule()
-
-tasks_dm = [Task("t1", 1, 4, 4), Task("t2", 4, 6, 15), Task("t3", 3, 6, 10)]
-test_dm = Scheduler(tasks_dm)
-test_dm.schedule()
