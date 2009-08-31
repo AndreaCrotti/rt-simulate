@@ -1,7 +1,6 @@
 #!/usr/bin/env python
-
-import os, sys, getopt, logging
 import ConfigParser
+import sys, getopt, logging
 
 from schedu import *
 
@@ -13,7 +12,7 @@ CONF = None
 
 logging.basicConfig(stream = sys.stdout)
 
-def load_conf(config):
+def load_tasksets(config):
     "Load a configuration file into the right data structure"
     from string import strip
     c = ConfigParser.ConfigParser()
@@ -26,18 +25,13 @@ def load_conf(config):
             try:
                 task = Task(j, *vals) # automatically handle the different possible input type with *
             except InputError:
-                print "task is not correct"
-                break
+                print "task %s is not correct" % (":".join([s, j]))
             else:
                 tset.append(task)
 
         whole[s] = Scheduler(tset)
     return whole
 
-def parse_conf(args):
-    pass
-
-# usage() and the flags configuration must alwasys be well in sync
 if __name__ == '__main__':
     opts, args = getopt.getopt(sys.argv[1:], "dvhc:g", ["debug", "verbose", "help", "conf", "gui"])
     for o, a in opts:
@@ -55,12 +49,12 @@ if __name__ == '__main__':
     # then finally start the engine, both frontends are working on the same
     # data and the same algorithms
     if GUI:
-        # for the GUI is not mandatory to have the jobs at the beginning
         from gui import run
-        # initial configuration passed
     else:
         from cli import run
         
-        l = load_conf(CONF_FILE)
+        l = load_tasksets(CONF_FILE)
         for k, v in l.items():
             print k, v
+
+        run(l)

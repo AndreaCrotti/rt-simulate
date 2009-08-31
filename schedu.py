@@ -29,13 +29,13 @@ class Task(object):
         self.remaining = cost # what left to do for the task
         # two inline functions useful later:
         self.done = lambda : self.remaining <= 0
-        self.is_deadline = lambda x: x % self.task["deadline"] == 0
+        self.is_deadline = lambda x: (x != 0) and (x % self.task["deadline"] == 0) # of course 0 is never a deadline
             
     def __getitem__(self, x):
         return self.task[x]
 
     def __str__(self):
-        return str(self.task) + "\tremaining: " + str(self.remaining)
+        return str(self.task)
         
     def reset(self):
         self.remaining = self["cost"]
@@ -73,8 +73,10 @@ class Scheduler(object):
 
     def select_algorithm(self):
         if any([t["deadline"] != t["period"] for t in self.tasks]):
+            logging.info("selecting deadline monotonic")
             return "deadline" # using deadline monotonic
         else:
+            logging.info("selecting rate monotonic")
             return "period" # using rate monotonic
     
     def add_task(self, task):
@@ -113,7 +115,7 @@ class Scheduler(object):
             for t in self.tasks:
                 if t.is_deadline(i):
                     if not(t.done()):
-                        logging.error("error error task %s is not finished before deadline" % t["name"])
+                        logging.error("at time %d error error task %s is not finished before deadline" % (i, t["name"]))
                     t.reset()
             
             cur_task = self.get_next() # should not need every time
