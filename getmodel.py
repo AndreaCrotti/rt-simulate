@@ -7,6 +7,8 @@ VERBOSE = False
 GUI = False
 CONF = None
 
+logging.basicConfig(stream = sys.stdout)
+
 def load_conf(config):
     "Load a configuration file into the right data structure"
     from string import strip
@@ -24,12 +26,12 @@ def parse_conf(args):
 
 # usage() and the flags configuration must alwasys be well in sync
 if __name__ == '__main__':
-    opts, args = getopt.getopt(sys.argv[1:], "vhc:g")
+    opts, args = getopt.getopt(sys.argv[1:], "dvhc:g", ["debug", "verbose", "help", "conf", "gui"])
     for o, a in opts:
         if o == "-v":
             # the verbosity should be handled with Logging
             # in this way also using the GUI is fine
-            VERBOSE = True
+            logging.setLevel(logging.INFO)
         if o == "-h":
             usage()
         if o == "-c":
