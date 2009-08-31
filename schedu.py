@@ -27,9 +27,6 @@ class Task(object):
         self.task = dict(name = name, cost = cost, deadline = deadline, period = period)
 
         self.remaining = cost # what left to do for the task
-        # two inline functions useful later:
-        self.done = lambda : self.remaining <= 0
-        self.is_deadline = lambda x: (x != 0) and (x % self.task["deadline"] == 0) # of course 0 is never a deadline
             
     def __getitem__(self, x):
         return self.task[x]
@@ -37,6 +34,12 @@ class Task(object):
     def __str__(self):
         return str(self.task)
         
+    def is_deadline(self, x):
+        return (x != 0) and (x % self.task["deadline"] == 0)
+
+    def is_done(self):
+        return self.remaining <= 0
+
     def reset(self):
         self.remaining = self["cost"]
 
@@ -85,7 +88,7 @@ class Scheduler(object):
 
     def queue(self):
         """ Returning a sorted priority list of unfinished jobs """
-        q = [ task for task in self.tasks if not (task.done()) ]
+        q = [ task for task in self.tasks if not (task.is_done()) ]
         q.sort(key = lambda t: t[self.sort_key]) # sorting here because the algorithm could change adding new tasks
         return q
 
@@ -114,7 +117,7 @@ class Scheduler(object):
             recalc = False
             for t in self.tasks:
                 if t.is_deadline(i):
-                    if not(t.done()):
+                    if not(t.is_done()):
                         logging.error("at time %d error error task %s is not finished before deadline" % (i, t["name"]))
                     t.reset()
             
@@ -165,7 +168,7 @@ class Scheduler(object):
             If for any task wcrt(i) > di then the task set is surely not schedulable """
             cost = self.tasks[idx]["cost"]
 
-            r = [ self.tasks[x]["cost"] for x in range(idx+1) ] # setting r_idx[0]
+            r = [ self.tasks[x]["cost"] for x in range(idx + 1) ] # setting r_idx[0]
             while True:
                 next_value = cost +\
                              sum([int(floor(r[-1] / self.tasks[h]["deadline"])) for h in range(idx) ])
