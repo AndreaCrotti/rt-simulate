@@ -57,6 +57,9 @@ class TimeLine(object):
         self.timeline[idx] = val
 
 class Scheduler(object):
+    """ Scheduler class, takes a list of tasks as input initially (which may also be empty)
+    Every time a new task is added the hyperperiod and the scheduling are recalculated """
+    
     def __init__(self, tasks):
         self.tasks = tasks
         self.setup()
