@@ -6,15 +6,15 @@ import random
 import logging
 from math import pow, floor
 
+from errors import *
+
 class Task(object):
     """ This class define a taks"""
     def __init__(self, name, cost, deadline, period = None):
         if not period:
             period = deadline
-        else:
-            if period < deadline:
-                print "error, period must be greater or equal to deadline"
-                
+        self.check()
+
         self.task = dict(name = name, cost = cost, deadline = deadline, period = period)
         self.remaining = cost # what left to do for the task
         # two inline functions useful later:
@@ -27,6 +27,10 @@ class Task(object):
     def __str__(self):
         return str(self.task) + "\tremaining: " + str(self.remaining)
 
+    def check(self, period, deadline):
+        if period < deadline:
+            raise InputError("period must be greater or equal to deadline")
+        
     def reset(self):
         self.remaining = self["cost"]
 
@@ -39,7 +43,7 @@ class TimeLine(object):
         
     def __str__(self):
         return ' '.join(map(str, enumerate(self.timeline)))
-
+    
     def __setitem__(self, idx, val):
         self.timeline[idx] = val
 
@@ -59,7 +63,7 @@ class Scheduler(object):
     def hyper_period(self):
         """Computes the hyper_period"""
         periods = [x["period"] for x in self.tasks]
-        return lcm(periods)
+        return list_lcm(periods)
 
     def select_algorithm(self):
         if any([t["deadline"] != t["period"] for t in self.tasks]):
@@ -86,7 +90,7 @@ class Scheduler(object):
 
     def schedule(self):
         """Finally schedule the task set, only possible when the priorities are set"""
-        # Timeline is long as the hyperperiod, we go through it until we schedule everything
+        # Timeline must is long as the hyperperiod, we go through it until we schedule everything
         # Timeline is just a list long as the hyperperiod initially set to 0 and then filled with tasks numbers
         # a cycle where at every deadline we check again the priorities (preemption possible)
 
@@ -96,7 +100,7 @@ class Scheduler(object):
             return
         
         cur_task = self.get_next()
-
+        
         for i in range(self.hyper):
             # get a new task only when one deadline is found
             recalc = False
@@ -124,6 +128,7 @@ class Scheduler(object):
     
     def is_schedulable(self):
         if self.sort_key == "period":
+            
             s = self.is_sched_rm()
             if s == None:
                 return self.worst_case_analysis()
@@ -169,13 +174,12 @@ class Scheduler(object):
             print "task %s has wcrt = %d" % (self.tasks[i]["name"], w)
         return True
 
-# some useful functions
-def lcm(nums):
+def list_lcm(nums):
     """Calculates the lcm given a list of integers"""
     if len(nums) == 1:
         return nums[0]
     else:
-        snd = lcm(nums[1:])
+        snd = list_lcm(nums[1:])
         fst = nums[0]
         return ((fst * snd) / (gcd(fst, snd)))
 
@@ -190,13 +194,6 @@ def gcd(a, b):
             return a
         else:
             return gcd(b, a % b)
-
-
-def ulub(tasks):
-    """returns the least upper bound"""
-    m = [(float(c[0]) / c[2]) for c in tasks]
-    return (sum(m))
-
 
 def gen_tasks(n):
     """Generate n tasks"""
