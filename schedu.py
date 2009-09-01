@@ -170,17 +170,19 @@ class Scheduler(object):
         
         return None
         
-    # Analysis with the worst time response case, an iterative way to see if a task set is really schedulable
     def worst_case_analysis(self):
+        """ Worst case analysis checks for every task if the
+        worst case response time is less than the deadline and returns
+        True only if all tests are passed """
+        
         def wcrt(idx):
             """ Calculate the worst case response time of a particular task.
             If for any task wcrt(i) > di then the task set is surely not schedulable """
-            cost = self.tasks[idx]["cost"]
 
             r = [ sum([ self.tasks[x]["cost"] for x in range(idx + 1) ])] # setting r_idx[0]
             while True:
                 # ceil must take float numbers
-                next_value = cost +\
+                next_value = self.tasks[idx]["cost"] +\
                              sum([int(ceil(float(r[-1]) / self.tasks[h]["deadline"])) * self.tasks[h]["cost"]\
                                   for h in range(idx) ])
                 r.append(next_value)
