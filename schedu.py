@@ -30,7 +30,9 @@ class Task(object):
         return self.task[x]
 
     def __str__(self):
-        return str(self.task)
+        n = self.task["name"]
+        rest = ", ".join([str(self.task[x]) for x in ("cost", "deadline", "period")])
+        return ": ".join((n,rest))
         
     def is_deadline(self, x):
         return (x != 0) and (x % self.task["deadline"] == 0)
@@ -108,7 +110,7 @@ class Scheduler(object):
 
         # at time 0 all tasks starting
         if not(self.is_schedulable()):
-            logging.info("this task set is impossible to schedule")
+            print "this task set is impossible to schedule\n"
             return
         
         cur_task = self.get_next()
@@ -118,7 +120,9 @@ class Scheduler(object):
             recalc = False
             for t in self.tasks:
                 if t.is_deadline(i):
-                    # this check should not be really necessary, if the check is correct it never happens
+                    # --------------------------------------------------------------------------------------
+                    # this check should not be really necessary, if the analysis is correct it never happens
+                    # --------------------------------------------------------------------------------------
                     if not(t.is_done()):
                         err = "at time %d error error task %s is not finished before deadline\n" % (i, t["name"]) +\
                               "temp timeline is = %s" % str(self.timeline)
@@ -155,6 +159,7 @@ class Scheduler(object):
         True: schedulable
         False: not schedulable
         None: don't know"""
+        
         u_least = ulub(len(self.tasks))
         u_bound = self.utilisation_bound()
         
@@ -175,6 +180,7 @@ class Scheduler(object):
         worst case response time is less than the deadline and returns
         True only if all tests are passed """
         
+        # FIXME: check how would be possible an infinite loop with always growing values
         def wcrt(idx):
             """ Calculate the worst case response time of a particular task.
             If for any task wcrt(i) > di then the task set is surely not schedulable """
@@ -193,8 +199,6 @@ class Scheduler(object):
             w = wcrt(i)
 
             if w > self.tasks[i]["deadline"]:
-                # we stop when we find the first task not schedulable
-                logging.info("task %s not schedulable" % self.tasks[i]["name"])
                 return False
             
             logging.debug("task %s has wcrt = %d" % (self.tasks[i]["name"], w))
