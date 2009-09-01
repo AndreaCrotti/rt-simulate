@@ -5,7 +5,7 @@
 import random
 import logging
 import sys
-from math import pow, floor
+from math import pow, ceil
 
 from errors import *
 
@@ -118,6 +118,7 @@ class Scheduler(object):
             recalc = False
             for t in self.tasks:
                 if t.is_deadline(i):
+                    # this check should not be really necessary, if the check is correct it never happens
                     if not(t.is_done()):
                         err = "at time %d error error task %s is not finished before deadline\n" % (i, t["name"]) +\
                               "temp timeline is = %s" % str(self.timeline)
@@ -176,15 +177,15 @@ class Scheduler(object):
             If for any task wcrt(i) > di then the task set is surely not schedulable """
             cost = self.tasks[idx]["cost"]
 
-            r = [ self.tasks[x]["cost"] for x in range(idx + 1) ] # setting r_idx[0]
-            # FIXME: bug in the implementation of the wcrt algorithm!
+            r = [ sum([ self.tasks[x]["cost"] for x in range(idx + 1) ])] # setting r_idx[0]
             while True:
+                # ceil must take float numbers
                 next_value = cost +\
-                             sum([int(floor(r[-1] / self.tasks[h]["deadline"])) for h in range(idx) ])
+                             sum([int(ceil(float(r[-1]) / self.tasks[h]["deadline"])) * self.tasks[h]["cost"]\
+                                  for h in range(idx) ])
                 r.append(next_value)
-                logging.debug("list: %s" % str(r))
-                if r[-1] == r[-2]: # Insert check of list length
-                    return sum(r[:-1])
+                if r[-1] == r[-2]: # We are safe that we already have two values
+                    return r[-1]
 
         for i in range(len(self.tasks)):
             w = wcrt(i)
