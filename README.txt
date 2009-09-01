@@ -2,7 +2,7 @@
                             =============
 
 Author: andrea crotti <andrea.crotti.0@gmail.com>
-Date: 2009-08-31 18:22:00 CEST
+Date: 2009-09-01 12:07:08 CEST
 
 
 Table of Contents
@@ -12,10 +12,13 @@ Table of Contents
 3 test deeply all the possible error conditions 
 4 General concepts 
 5 GUI 
-    5.1 Functions 
-    5.2 Implementation 
-    5.3 Hints 
-    5.4 Debugging 
+    5.1 FIG format 
+    5.2 Matplotlib 
+    5.3 wxPython 
+        5.3.1 Functions 
+        5.3.2 Implementation 
+        5.3.3 Hints 
+        5.3.4 Debugging 
 6 Languages used 
 7 Frameworks 
 8 Language table 
@@ -68,37 +71,51 @@ Using a MVC pattern to design the application, which must be easily adapt to new
 
 5 GUI 
 ~~~~~~
+  
 
-5.1 Functions 
-==============
-   One simple menubar where you can:
-   - load a configuration file
-   - run the scheduling
-   - check if everything is working
-   - add a new task to the current task set (this enable automatic redrawing)
-     
-   The main window must contain the hyperperiod scheduling, made of blocks of different colors and lines for the deadlines.
+5.1 FIG format 
+===============
 
-5.2 Implementation 
-===================
-     
-   We'll use a *wxSizer* object, allows to place objects which will be automatically resized or replaced.
-   Important to remember that sizer != parent object.
-   
-   After the layout is ready (box/grid or other) we set up everything with:
-   1. window.SetSizer(sizer)
-   2. window.SetAutoLayout(true)
-   3. sizer.Fit(window)
+5.2 Matplotlib 
+===============
+   [matplotlib tutorial]
 
-5.3 Hints 
-==========
 
-   When taking input from user *wxValidator* is needed to check if the input is correct
-   (Note: Your wxValidator sub-class must implement the wxValidator.Clone() method.)
+   [matplotlib tutorial]: http://matplotlib.sourceforge.net/users/artists.html
 
-5.4 Debugging 
-==============
-   A nice way to debug is using pycrust
+5.3 wxPython 
+=============
+
+5.3.1 Functions 
+----------------
+    One simple menubar where you can:
+    - load a configuration file
+    - run the scheduling
+    - check if everything is working
+    - add a new task to the current task set (this enable automatic redrawing)
+      
+    The main window must contain the hyperperiod scheduling, made of blocks of different colors and lines for the deadlines.
+
+5.3.2 Implementation 
+---------------------
+      
+    We'll use a *wxSizer* object, allows to place objects which will be automatically resized or replaced.
+    Important to remember that sizer != parent object.
+    
+    After the layout is ready (box/grid or other) we set up everything with:
+    1. window.SetSizer(sizer)
+    2. window.SetAutoLayout(true)
+    3. sizer.Fit(window)
+
+5.3.3 Hints 
+------------
+
+    When taking input from user *wxValidator* is needed to check if the input is correct
+    (Note: Your wxValidator sub-class must implement the wxValidator.Clone() method.)
+
+5.3.4 Debugging 
+----------------
+    A nice way to debug is using pycrust
 
 6 Languages used 
 ~~~~~~~~~~~~~~~~~

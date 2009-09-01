@@ -4,6 +4,3 @@ def run(tasksets):
         print tset
         if tset.schedule():
             print tset.timeline
-
-
-        

@@ -31,33 +31,38 @@ In plus there will be an interactive modality (cli or GUI) where those operation
 Using a MVC pattern to design the application, which must be easily adapt to new algorithms and data types.
 
 * GUI
+  
+** FIG format
+** Matplotlib
+   [[http://matplotlib.sourceforge.net/users/artists.html][matplotlib tutorial]]
 
-** Functions
-   One simple menubar where you can:
-   - load a configuration file
-   - run the scheduling
-   - check if everything is working
-   - add a new task to the current task set (this enable automatic redrawing)
-     
-   The main window must contain the hyperperiod scheduling, made of blocks of different colors and lines for the deadlines.
+** wxPython
+*** Functions
+    One simple menubar where you can:
+    - load a configuration file
+    - run the scheduling
+    - check if everything is working
+    - add a new task to the current task set (this enable automatic redrawing)
+      
+    The main window must contain the hyperperiod scheduling, made of blocks of different colors and lines for the deadlines.
 
-** Implementation
-     
-   We'll use a *wxSizer* object, allows to place objects which will be automatically resized or replaced.
-   Important to remember that sizer != parent object.
-   
-   After the layout is ready (box/grid or other) we set up everything with:
-   1. window.SetSizer(sizer)
-   2. window.SetAutoLayout(true)
-   3. sizer.Fit(window)
+*** Implementation
+      
+    We'll use a *wxSizer* object, allows to place objects which will be automatically resized or replaced.
+    Important to remember that sizer != parent object.
+    
+    After the layout is ready (box/grid or other) we set up everything with:
+    1. window.SetSizer(sizer)
+    2. window.SetAutoLayout(true)
+    3. sizer.Fit(window)
 
-** Hints
+*** Hints
 
-   When taking input from user *wxValidator* is needed to check if the input is correct
-   (Note: Your wxValidator sub-class must implement the wxValidator.Clone() method.)
+    When taking input from user *wxValidator* is needed to check if the input is correct
+    (Note: Your wxValidator sub-class must implement the wxValidator.Clone() method.)
 
-** Debugging
-   A nice way to debug is using pycrust
+*** Debugging
+    A nice way to debug is using pycrust
 
 * Languages used
   - python (for the gui and control interface)
