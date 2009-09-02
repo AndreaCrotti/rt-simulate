@@ -196,7 +196,8 @@ class Scheduler(object):
                              sum([int(ceil(float(r[-1]) / self.tasks[h]["deadline"])) * self.tasks[h]["cost"]\
                                   for h in range(idx) ])
                 r.append(next_value)
-                if r[-1] == r[-2]: # We are safe that we already have two values
+                # Checking if passing the deadline or getting to fix point
+                if (r[-1] > self.tasks[idx]["deadline"]) or (r[-1] == r[-2]):
                     return r[-1]
 
         for i in range(len(self.tasks)):
@@ -229,11 +230,3 @@ def ulub(dim):
     """ Least upper bound, only depending on the length"""
     return dim * (pow(2, (1.0 / dim)) - 1)
 
-def gen_harmonic(k, dim):
-    """ Generate a n-dimension harmonic test, which must be schedulable and utilisation_bound = 1"""
-    t = []
-    for i in range(dim - 1):
-        name = "t" + str(i)
-        t.append(Task(name, 1, pow(2, i)))
-    # fix here and use the right equation to find the rest (reaching 1)
-    t.append(Task("t" + str(i), 1, pow(2, i)))

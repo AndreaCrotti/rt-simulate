@@ -44,6 +44,10 @@ Using a MVC pattern to design the application, which must be easily adapt to new
 ** SVGfig
    [[http://code.google.com/p/svgfig/wiki/Introduction][svgfig tutorial]], one big library composed of only one file.
    Possibility to export in different formats
+   Some nice links:
+   - [[http://en.wikipedia.org/wiki/Scalable_Vector_Graphics][wikipedia SVG page]]
+   - [[http://www.datenverdrahten.de/svglbc/][learning by coding]]
+   - 
 
 ** wxPython
 *** Functions
