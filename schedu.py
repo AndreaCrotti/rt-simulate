@@ -23,7 +23,7 @@ class Task(object):
             raise InputError(err)
         
         self.task = dict(name = name, cost = cost, deadline = deadline, period = period)
-
+        self.task["wcet"] = cost
         self.remaining = cost # what left to do for the task
             
     def __getitem__(self, x):
@@ -32,8 +32,12 @@ class Task(object):
     def __str__(self):
         n = self.task["name"]
         rest = ", ".join([str(self.task[x]) for x in ("cost", "deadline", "period")])
+        rest += "\t wcet: %d" % self.task["wcet"]
         return ": ".join((n,rest))
         
+    def is_schedulable(self):
+        return (self.task["wcet"] <= self.task["deadline"])
+
     def is_deadline(self, x):
         return (x != 0) and (x % self.task["deadline"] == 0)
 
@@ -68,9 +72,11 @@ class Scheduler(object):
         return '\n'.join([ str(t) for t in self.tasks ])
     
     def setup(self):
+        logging.info("setting up the task\n")
         self.hyper = self.hyper_period()
         self.timeline = TimeLine(self.hyper) # faster methods?
         self.sort_key = self.select_algorithm()
+        self.worst_case_analysis()
 
     def hyper_period(self):
         """Computes the hyper_period"""
@@ -89,6 +95,7 @@ class Scheduler(object):
         self.tasks.append(task)
         self.setup() # Too much effort recalculating everything every time??
 
+    # TOO MANY SIDE EFFECTS, rewrite more functionally (erlang maybe?)
     def queue(self):
         """ Returning a sorted priority list of unfinished jobs """
         q = [ task for task in self.tasks if not (task.is_done()) ]
@@ -107,11 +114,6 @@ class Scheduler(object):
         # Timeline must is long as the hyperperiod, we go through it until we schedule everything
         # Timeline is just a list long as the hyperperiod initially set to 0 and then filled with tasks numbers
         # a cycle where at every deadline we check again the priorities (preemption possible)
-
-        # at time 0 all tasks starting
-        if not(self.is_schedulable()):
-            print "this task set is impossible to schedule\n"
-            return
         
         cur_task = self.get_next()
         
@@ -143,15 +145,15 @@ class Scheduler(object):
     
     def is_schedulable(self):
         if self.sort_key == "period":
-            s = self.is_sched_rm()
-            if s == None:
+            rm_sched = self.is_sched_rm()
+            if rm_sched == None:
                 logging.info("necessary to analyze the worst case response")
-                return self.worst_case_analysis()
+                return self.worst_case_check()
             else:
-                return s
+                return rm_sched
         else:
             # in the deadline monotonic we only use the wcrt
-            return self.worst_case_analysis()
+            return self.worst_case_check()
 
     def is_sched_rm(self):
         """test if the taskset can be schedulable,
@@ -173,8 +175,16 @@ class Scheduler(object):
             logging.info("it's surely schedulable")
             return True
         
-        return None
+        return None 
         
+    def worst_case_check(self):
+        for t in self.tasks:
+            w, d = t["wcet"], t["deadline"]
+            if w > d:
+                logging.info("task %s is not schedulable" % str(t))
+                return False
+        return True
+
     def worst_case_analysis(self):
         """ Worst case analysis checks for every task if the
         worst case response time is less than the deadline and returns
@@ -196,13 +206,9 @@ class Scheduler(object):
                     return r[-1]
 
         for i in range(len(self.tasks)):
-            w = wcrt(i)
-
-            if w > self.tasks[i]["deadline"]:
-                return False
-            
-            logging.debug("task %s has wcrt = %d" % (self.tasks[i]["name"], w))
-        return True
+            # we set the wcet for all the tasks, check will be elsewhere
+            logging.info("setting wcet for %d" % i)
+            self.tasks[i].task["wcet"] = wcrt(i)
 
 def lcm_list(nums):
     """Calculates the lcm given a list of integers"""

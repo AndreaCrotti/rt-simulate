@@ -33,8 +33,17 @@ Using a MVC pattern to design the application, which must be easily adapt to new
 * GUI
   
 ** FIG format
+   [[http://homepage.usask.ca/~ijm451/fig/][fig format description]]
+   See the [[http://www-epb.lbl.gov/xfig/frm_drawing.html][xfig user manual]]
+   Must find a python library able to translate in xfig format.
+   Here is the format: [[http://www-epb.lbl.gov/xfig/fig-format.html][fig format]], [[file:fig_format.txt][txt fig format]]
+   
 ** Matplotlib
    [[http://matplotlib.sourceforge.net/users/artists.html][matplotlib tutorial]]
+
+** SVGfig
+   [[http://code.google.com/p/svgfig/wiki/Introduction][svgfig tutorial]], one big library composed of only one file.
+   Possibility to export in different formats
 
 ** wxPython
 *** Functions
