@@ -38,16 +38,15 @@ Using a MVC pattern to design the application, which must be easily adapt to new
    Must find a python library able to translate in xfig format.
    Here is the format: [[http://www-epb.lbl.gov/xfig/fig-format.html][fig format]], [[file:fig_format.txt][txt fig format]]
    
-** Matplotlib
-   [[http://matplotlib.sourceforge.net/users/artists.html][matplotlib tutorial]]
-
 ** SVGfig
-   [[http://code.google.com/p/svgfig/wiki/Introduction][svgfig tutorial]], one big library composed of only one file.
-   Possibility to export in different formats
-   Some nice links:
-   - [[http://en.wikipedia.org/wiki/Scalable_Vector_Graphics][wikipedia SVG page]]
-   - [[http://www.datenverdrahten.de/svglbc/][learning by coding]]
-   - 
+   
+*** Doc
+    [[http://code.google.com/p/svgfig/wiki/Introduction][svgfig tutorial]], one big library composed of only one file.
+    Possibility to export in different formats
+    Some nice links:
+    - [[http://en.wikipedia.org/wiki/Scalable_Vector_Graphics][wikipedia SVG page]]
+    - [[http://www.datenverdrahten.de/svglbc/][learning by coding]]
+    - [[http://www.december.com/html/spec/colorspottable.html][table of colors available]]: color are the same used in the CSS style
 
 ** wxPython
 *** Functions
