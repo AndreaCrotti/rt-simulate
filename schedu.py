@@ -122,14 +122,8 @@ class Scheduler(object):
             recalc = False
             for t in self.tasks:
                 if t.is_deadline(i):
-                    # --------------------------------------------------------------------------------------
-                    # this check should not be really necessary, if the analysis is correct it never happens
-                    # --------------------------------------------------------------------------------------
-                    if not(t.is_done()):
-                        err = "at time %d error error task %s is not finished before deadline\n" % (i, t["name"]) +\
-                              "temp timeline is = %s" % str(self.timeline)
-                        logging.error(err)
-                        return False
+                    # this should be always true if checks are working correctly
+                    assert(t.is_done())
                     t.reset()
             
             cur_task = self.get_next() # should not need every time

@@ -4,6 +4,5 @@ def run(tasksets):
         if not(tset.is_schedulable()):
             print "this task set is not schedulable\n"
         else:
-            x = tset.schedule()
-            if x:
-                print "TIMELINE:\n %s" % str(tset.timeline)
+            tset.schedule()
+            print "TIMELINE:\n %s" % str(tset.timeline)
