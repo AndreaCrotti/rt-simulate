@@ -9,4 +9,6 @@ def analyze(taskset):
         print "this task set is not schedulable\n"
     else:
         tset.schedule()
+        print "\nHYPERPERIOD: %d\n" % tset.hyper
+        print "\nUSING ALGORITHM: %s\n" % tset.algo
         print "TIMELINE:\n %s" % str(tset.timeline)

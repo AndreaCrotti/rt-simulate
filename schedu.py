@@ -86,9 +86,11 @@ class Scheduler(object):
     def select_algorithm(self):
         if any([t["deadline"] != t["period"] for t in self.tasks]):
             logging.info("selecting deadline monotonic")
+            self.algo = "deadline monotonic"
             return "deadline" # using deadline monotonic
         else:
             logging.info("selecting rate monotonic")
+            self.algo = "rate monotonic"
             return "period" # using rate monotonic
     
     def add_task(self, task):
@@ -193,7 +195,7 @@ class Scheduler(object):
             while True:
                 # ceil must take float numbers
                 next_value = self.tasks[idx]["cost"] +\
-                             sum([int(ceil(float(r[-1]) / self.tasks[h]["deadline"])) * self.tasks[h]["cost"]\
+                             sum([int(ceil(float(r[-1]) / self.tasks[h]["period"])) * self.tasks[h]["cost"]\
                                   for h in range(idx) ])
                 r.append(next_value)
                 # Checking if passing the deadline or getting to fix point
