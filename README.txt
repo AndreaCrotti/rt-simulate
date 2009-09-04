@@ -2,7 +2,7 @@
                             =============
 
 Author: andrea crotti <andrea.crotti.0@gmail.com>
-Date: 2009-09-01 12:07:08 CEST
+Date: 2009-09-04 18:42:32 CEST
 
 
 Table of Contents
@@ -13,7 +13,8 @@ Table of Contents
 4 General concepts 
 5 GUI 
     5.1 FIG format 
-    5.2 Matplotlib 
+    5.2 SVGfig 
+        5.2.1 Doc 
     5.3 wxPython 
         5.3.1 Functions 
         5.3.2 Implementation 
@@ -75,13 +76,35 @@ Using a MVC pattern to design the application, which must be easily adapt to new
 
 5.1 FIG format 
 ===============
+   [fig format description]
+   See the [xfig user manual]
+   Must find a python library able to translate in xfig format.
+   Here is the format: [fig format], [txt fig format]
+   
 
-5.2 Matplotlib 
-===============
-   [matplotlib tutorial]
+   [fig format description]: http://homepage.usask.ca/~ijm451/fig/
+   [xfig user manual]: http://www-epb.lbl.gov/xfig/frm_drawing.html
+   [fig format]: http://www-epb.lbl.gov/xfig/fig-format.html
+   [txt fig format]: file:fig_format.txt
+
+5.2 SVGfig 
+===========
+   
+
+5.2.1 Doc 
+----------
+    [svgfig tutorial], one big library composed of only one file.
+    Possibility to export in different formats
+    Some nice links:
+    - [wikipedia SVG page]
+    - [learning by coding]
+    - [table of colors available]: color are the same used in the CSS style
 
 
-   [matplotlib tutorial]: http://matplotlib.sourceforge.net/users/artists.html
+    [svgfig tutorial]: http://code.google.com/p/svgfig/wiki/Introduction
+    [wikipedia SVG page]: http://en.wikipedia.org/wiki/Scalable_Vector_Graphics
+    [learning by coding]: http://www.datenverdrahten.de/svglbc/
+    [table of colors available]: http://www.december.com/html/spec/colorspottable.html
 
 5.3 wxPython 
 =============
