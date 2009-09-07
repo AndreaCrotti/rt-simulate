@@ -2,7 +2,6 @@
 import ConfigParser
 import sys, getopt, logging
 from string import strip
-
 from schedu import *
 
 DEFAULTCONF = "example.conf"
@@ -40,8 +39,25 @@ def taskset_toini(tset):
         c.set(s, t, v.to_ini())
     return c
 
+def run(tasksets):
+    for x in tasksets.items():
+        analyze(x)
+
+def analyze(taskset):
+    name, tset = taskset
+    print "\n\t ANALYZING %s \n%s" % (name, str(tset))
+    if not(tset.is_schedulable()):
+        print "this task set is not schedulable\n"
+    else:
+        tset.schedule()
+        print "\nHYPERPERIOD: %d\n" % tset.hyper
+        print "\nUSING ALGORITHM: %s\n" % tset.algo
+        print "TIMELINE:\n %s" % str(tset.timeline)
+        if GUI:
+            svg.write(tset)
+
 if __name__ == '__main__':
-    opts, args = getopt.getopt(sys.argv[1:], "dvhc:g", ["debug", "verbose", "help", "conf", "gui"])
+    opts, args = getopt.getopt(sys.argv[1:], "dvhc:g")
 
     for o, a in opts:
         if o == "-v":
@@ -55,9 +71,13 @@ if __name__ == '__main__':
         if o == "-d":
             logging.getLogger().setLevel(logging.DEBUG)
 
+    if GUI:
+        import svg
     # then finally start the engine, both frontends are working on the same
     # data and the same algorithms
     from cli import run
-        
     l = parse_tasksets(CONF_FILE)
     run(l)
+    
+    
+

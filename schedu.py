@@ -92,6 +92,9 @@ class Scheduler(object):
         u = "TOTAL UTILISATION BOUND: " + str(round(self.utilisation_bound(), 3))
         return '\n'.join([t, u])
 
+    def __len__(self):
+        return len(self.task_dict)
+
     def setup(self):
         logging.info("setting up the task\n")
         self.hyper = self.hyper_period()
@@ -130,7 +133,7 @@ class Scheduler(object):
         q.sort(key = lambda t: t[self.sort_key]) # sorting here because the algorithm could change adding new tasks
         return q
 
-    def get_next(self):
+    def next_task(self):
         q = self.queue()
         if len(q) >= 1:
             return q[0]
@@ -143,18 +146,18 @@ class Scheduler(object):
         # Timeline is just a list long as the hyperperiod initially set to 0 and then filled with tasks numbers
         # a cycle where at every deadline we check again the priorities (preemption possible)
         
-        cur_task = self.get_next()
+        cur_task = self.next_task()
         
         for i in range(self.hyper):
             # get a new task only when one deadline is found
             recalc = False
-            for t in self.tasks:
+            for t in self.tasks():
                 if t.is_deadline(i):
                     # this should be always true if checks are working correctly
                     assert(t.is_done())
                     t.reset()
             
-            cur_task = self.get_next() # should not need every time
+            cur_task = self.next_task() # should not need every time
             if not(cur_task):
                 continue # just go to the next position on the timeline
 
@@ -189,7 +192,7 @@ class Scheduler(object):
         False: not schedulable
         None: don't know"""
         
-        u_least = ulub(len(self.tasks))
+        u_least = ulub(len(self))
         u_bound = self.utilisation_bound()
         
         logging.debug("ulub = %f, ubound = %f" % (u_least, u_bound))
@@ -198,14 +201,14 @@ class Scheduler(object):
             logging.info("Task set with U > 1 is never schedulable")
             return False
 
-        elif u_least < ulub(len(self.tasks)):
+        elif u_bound < u_least:
             logging.info("it's surely schedulable")
             return True
         
-        return None 
+        return None # no information given
         
     def worst_case_check(self):
-        for t in self.tasks:
+        for t in self.tasks():
             w, d = t["wcet"], t["deadline"]
             if w > d:
                 logging.info("task %s is not schedulable" % str(t))
