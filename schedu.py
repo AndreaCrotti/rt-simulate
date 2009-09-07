@@ -27,16 +27,20 @@ class Task(object):
         self.task = dict(name = name, cost = cost, deadline = deadline, period = period)
         self.task["wcet"] = cost
         self.remaining = cost # what left to do for the task
+        self.line = lambda sep: sep.join([str(self.task[x]) for x in ("cost", "deadline", "period")])
             
     def __getitem__(self, x):
         return self.task[x]
 
     def __str__(self):
         n = self.task["name"]
-        rest = ", ".join([str(self.task[x]) for x in ("cost", "deadline", "period")])
+        rest = self.line(", ")
         rest += "\t wcet: %d" % self.task["wcet"]
         return ": ".join((n,rest))
         
+    def to_ini(self):
+        return self.line(", ")
+
     def is_schedulable(self):
         return (self.task["wcet"] <= self.task["deadline"])
 

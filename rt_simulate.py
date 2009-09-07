@@ -19,7 +19,7 @@ def parse_tasksets(config):
     c.read(config)
     whole = {}
     for s in c.sections():
-        tset = []
+        tset = Scheduler()
         for j, v in c.items(s):
             vals = map(int, map(strip, v.split(',')))
             try:
@@ -27,15 +27,18 @@ def parse_tasksets(config):
             except InputError:
                 logging.info("task %s is not correct" % (":".join([s, j])))
             else:
-                tset.append(task)
-
-        whole[s] = Scheduler(tset)
+                tset.add_task(task)
+        whole[s] = tset
     return whole
 
-def write_tasksets(tset, config_file):
+def taskset_toini(tset):
+    """ Return the ini conf from a given task set """
     c = ConfigParser.ConfigParser()
-    pass
-
+    s = "taskset"
+    c.add_section(s)
+    for t, v in tset.task_dict.items():
+        c.set(s, t, v.to_ini())
+    return c
 
 if __name__ == '__main__':
     opts, args = getopt.getopt(sys.argv[1:], "dvhc:g", ["debug", "verbose", "help", "conf", "gui"])
@@ -54,10 +57,7 @@ if __name__ == '__main__':
 
     # then finally start the engine, both frontends are working on the same
     # data and the same algorithms
-    if GUI:
-        from gui import run
-    else:
-        from cli import run
+    from cli import run
         
-        l = parse_tasksets(CONF_FILE)
-        run(l)
+    l = parse_tasksets(CONF_FILE)
+    run(l)
