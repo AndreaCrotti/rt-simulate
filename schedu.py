@@ -64,7 +64,7 @@ class Scheduler(object):
     """ Scheduler class, takes a list of tasks as input initially (which may also be empty)
     Every time a new task is added the hyperperiod and the scheduling are recalculated """
     
-    def __init__(self, tasks):
+    def __init__(self, tasks = []):
         self.tasks = tasks
         self.setup()
 
@@ -93,7 +93,16 @@ class Scheduler(object):
             self.algo = "rate monotonic"
             return "period" # using rate monotonic
     
+    def remove_task(self, task_name):
+        # should be only one
+        ts = [ t for t in self.tasks if t['name'] == task_name ]
+        for t in self.tasks:
+            if t['name'] == task_name:
+                logging.info("removing task %s" % task_name)
+                self.tasks.remove(t)
+
     def add_task(self, task):
+        logging.info("adding task %s" % task['name'])
         self.tasks.append(task)
         self.setup() # Too much effort recalculating everything every time??
 

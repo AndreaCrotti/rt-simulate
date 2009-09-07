@@ -2,6 +2,9 @@
 import random
 import math
 
+
+from schedu import Scheduler, Task
+
 def gen_harmonic(k, dim):
     """ Generate a n-dimension harmonic test, which must be schedulable and utilisation_bound = 1"""
     t = []
@@ -11,9 +14,17 @@ def gen_harmonic(k, dim):
     # fix here and use the right equation to find the rest (reaching 1)
     t.append(Task("t" + str(i), 1, pow(2, i)))
 
-def gen_taskset(mincost = 1, maxcost = 10, minperiod = 1,
-                minU = 0.5, maxU = 1.0):
+def gen_taskset(mincost = 1, maxcost = 10, minperiod = 1, maxperiod = 10):
     """ Generates a task set given the parameters """
-    # U is the shifted random number in my other window
-    u = maxU/2 + minU
-
+    s = Scheduler()
+    i = 0
+    while True:
+        cost = random.randrange(mincost, maxcost)
+        period = random.randrange(cost, maxperiod) # careful to what is passed in input
+        name = "t" + str(i)
+        s.add_task(Task(name, cost, period))
+        
+        if s.utilisation_bound() > 1:
+            s.remove(name)
+    
+    return s

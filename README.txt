@@ -2,7 +2,7 @@
                             =============
 
 Author: andrea crotti <andrea.crotti.0@gmail.com>
-Date: 2009-09-04 18:42:32 CEST
+Date: 2009-09-07 15:37:42 CEST
 
 
 Table of Contents
@@ -12,14 +12,13 @@ Table of Contents
 3 test deeply all the possible error conditions 
 4 General concepts 
 5 GUI 
-    5.1 FIG format 
-    5.2 SVGfig 
-        5.2.1 Doc 
-    5.3 wxPython 
-        5.3.1 Functions 
-        5.3.2 Implementation 
-        5.3.3 Hints 
-        5.3.4 Debugging 
+    5.1 SVGfig 
+        5.1.1 Doc 
+    5.2 wxPython 
+        5.2.1 Functions 
+        5.2.2 Implementation 
+        5.2.3 Hints 
+        5.2.4 Debugging 
 6 Languages used 
 7 Frameworks 
 8 Language table 
@@ -40,10 +39,10 @@ Table of Contents
 
 2 TODO write the graphical interface with wxWidget 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  
 
 3 TODO test deeply all the possible error conditions 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 
 4 General concepts 
 ~~~~~~~~~~~~~~~~~~~
@@ -73,9 +72,7 @@ Using a MVC pattern to design the application, which must be easily adapt to new
 5 GUI 
 ~~~~~~
   
-
-5.1 FIG format 
-===============
+  ** FIG format
    [fig format description]
    See the [xfig user manual]
    Must find a python library able to translate in xfig format.
@@ -87,11 +84,11 @@ Using a MVC pattern to design the application, which must be easily adapt to new
    [fig format]: http://www-epb.lbl.gov/xfig/fig-format.html
    [txt fig format]: file:fig_format.txt
 
-5.2 SVGfig 
+5.1 SVGfig 
 ===========
    
 
-5.2.1 Doc 
+5.1.1 Doc 
 ----------
     [svgfig tutorial], one big library composed of only one file.
     Possibility to export in different formats
@@ -106,10 +103,10 @@ Using a MVC pattern to design the application, which must be easily adapt to new
     [learning by coding]: http://www.datenverdrahten.de/svglbc/
     [table of colors available]: http://www.december.com/html/spec/colorspottable.html
 
-5.3 wxPython 
+5.2 wxPython 
 =============
 
-5.3.1 Functions 
+5.2.1 Functions 
 ----------------
     One simple menubar where you can:
     - load a configuration file
@@ -119,7 +116,7 @@ Using a MVC pattern to design the application, which must be easily adapt to new
       
     The main window must contain the hyperperiod scheduling, made of blocks of different colors and lines for the deadlines.
 
-5.3.2 Implementation 
+5.2.2 Implementation 
 ---------------------
       
     We'll use a *wxSizer* object, allows to place objects which will be automatically resized or replaced.
@@ -130,13 +127,13 @@ Using a MVC pattern to design the application, which must be easily adapt to new
     2. window.SetAutoLayout(true)
     3. sizer.Fit(window)
 
-5.3.3 Hints 
+5.2.3 Hints 
 ------------
 
     When taking input from user *wxValidator* is needed to check if the input is correct
     (Note: Your wxValidator sub-class must implement the wxValidator.Clone() method.)
 
-5.3.4 Debugging 
+5.2.4 Debugging 
 ----------------
     A nice way to debug is using pycrust
 
