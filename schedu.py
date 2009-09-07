@@ -1,14 +1,12 @@
 #!/usr/bin/env python
 # TODO: write the logging mechanism
 # TODO: write a better error handling (exceptions)
-
-import random
 import logging
-import sys
 from copy import deepcopy
 from math import pow, ceil
 
 from errors import *
+
 
 class Task(object):
     """ This class define a taks"""
@@ -302,4 +300,3 @@ def gcd(a, b):
 def ulub(dim):
     """ Least upper bound, only depending on the length"""
     return dim * (pow(2, (1.0 / dim)) - 1)
-
