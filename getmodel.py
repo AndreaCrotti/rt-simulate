@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import ConfigParser
 import sys, getopt, logging
+from string import strip
 
 from schedu import *
 
@@ -12,9 +13,8 @@ CONF = None
 
 logging.basicConfig(stream = sys.stdout)
 
-def load_tasksets(config):
+def parse_tasksets(config):
     "Load a configuration file into the right data structure"
-    from string import strip
     c = ConfigParser.ConfigParser()
     c.read(config)
     whole = {}
@@ -31,6 +31,11 @@ def load_tasksets(config):
 
         whole[s] = Scheduler(tset)
     return whole
+
+def write_tasksets(tset, config_file):
+    c = ConfigParser.ConfigParser()
+    pass
+
 
 if __name__ == '__main__':
     opts, args = getopt.getopt(sys.argv[1:], "dvhc:g", ["debug", "verbose", "help", "conf", "gui"])
@@ -54,5 +59,5 @@ if __name__ == '__main__':
     else:
         from cli import run
         
-        l = load_tasksets(CONF_FILE)
+        l = parse_tasksets(CONF_FILE)
         run(l)

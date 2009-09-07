@@ -5,6 +5,7 @@
 import random
 import logging
 import sys
+from copy import deepcopy
 from math import pow, ceil
 
 from errors import *
@@ -17,6 +18,7 @@ class Task(object):
 
         elif period < deadline:
             err = "period must be greater or equal to deadline"
+            # Should raise some exceptions here
             logging.error(err)
             # in debug all the info
             logging.debug("error on object" + "\t,".join(map(str, [name, cost, deadline, period])))
@@ -60,17 +62,32 @@ class TimeLine(object):
     def __setitem__(self, idx, val):
         self.timeline[idx] = val
 
+    def time(self, task):
+        t = deepcopy(task) # don't want to modify the original task
+        for i in range(self.length):
+            if t.is_done():
+                return i
+
+            if self.timeline[i] == t['name']:
+                t['remaining'] -= 1
+
 class Scheduler(object):
     """ Scheduler class, takes a list of tasks as input initially (which may also be empty)
     Every time a new task is added the hyperperiod and the scheduling are recalculated """
     
     def __init__(self, tasks = []):
-        self.tasks = tasks
+        self.task_dict = {}
+        for n, t in [(t['name'], t) for t in tasks]:
+            self.task_dict[n] = t
+
+        self.tasks = lambda : self.task_dict.values()
         self.setup()
 
     def __str__(self):
-        return '\n'.join([ str(t) for t in self.tasks ])
-    
+        t = '\n'.join([ str(t) for t in self.tasks() ])
+        u = "TOTAL UTILISATION BOUND: " + str(round(self.utilisation_bound(), 3))
+        return '\n'.join([t, u])
+
     def setup(self):
         logging.info("setting up the task\n")
         self.hyper = self.hyper_period()
@@ -80,11 +97,11 @@ class Scheduler(object):
 
     def hyper_period(self):
         """Computes the hyper_period"""
-        periods = [ x["period"] for x in self.tasks ]
+        periods = [ x["period"] for x in self.tasks() ]
         return lcm_list(periods)
 
     def select_algorithm(self):
-        if any([t["deadline"] != t["period"] for t in self.tasks]):
+        if any([t["deadline"] != t["period"] for t in self.tasks() ]):
             logging.info("selecting deadline monotonic")
             self.algo = "deadline monotonic"
             return "deadline" # using deadline monotonic
@@ -95,21 +112,17 @@ class Scheduler(object):
     
     def remove_task(self, task_name):
         # should be only one
-        ts = [ t for t in self.tasks if t['name'] == task_name ]
-        for t in self.tasks:
-            if t['name'] == task_name:
-                logging.info("removing task %s" % task_name)
-                self.tasks.remove(t)
+        logging.info("removing task %s" % task_name)
+        self.task_dict.pop(task_name)
 
     def add_task(self, task):
         logging.info("adding task %s" % task['name'])
-        self.tasks.append(task)
+        self.task_dict[task['name']] = task
         self.setup() # Too much effort recalculating everything every time??
 
-    # TOO MANY SIDE EFFECTS, rewrite more functionally (erlang maybe?)
     def queue(self):
         """ Returning a sorted priority list of unfinished jobs """
-        q = [ task for task in self.tasks if not (task.is_done()) ]
+        q = [ task for task in self.tasks() if not (task.is_done()) ]
         q.sort(key = lambda t: t[self.sort_key]) # sorting here because the algorithm could change adding new tasks
         return q
 
@@ -144,9 +157,14 @@ class Scheduler(object):
             self.timeline[i] = cur_task["name"]
             cur_task.remaining -= 1
         return True
+    
+    def real_wcet(self, task):
+        """ Computes the real wcet of task, given the timeline (works
+        also if not schedulable task set """
+        return self.timeline.time(task)
 
     def utilisation_bound(self):
-        return sum([float(x["cost"]) / x["period"] for x in self.tasks])
+        return sum([float(x["cost"]) / x["period"] for x in self.tasks()])
     
     def is_schedulable(self):
         if self.sort_key == "period":
@@ -200,24 +218,26 @@ class Scheduler(object):
             """ Calculate the worst case response time of a particular task.
             If for any task wcrt(i) > di then the task set is surely not schedulable """
 
-            r = [ sum([ self.tasks[x]["cost"] for x in range(idx + 1) ])] # setting r_idx[0]
+            r = [ sum([ t["cost"] for t in self.tasks() ])] # setting r_idx[0]
             while True:
                 # ceil must take float numbers
-                next_value = self.tasks[idx]["cost"] +\
-                             sum([int(ceil(float(r[-1]) / self.tasks[h]["period"])) * self.tasks[h]["cost"]\
+                next_value = self.tasks()[idx]["cost"] +\
+                             sum([int(ceil(float(r[-1]) / self.tasks()[h]["period"])) * self.tasks()[h]["cost"]\
                                   for h in range(idx) ])
                 r.append(next_value)
                 # Checking if passing the deadline or getting to fix point
-                if (r[-1] > self.tasks[idx]["deadline"]) or (r[-1] == r[-2]):
+                if (r[-1] > self.tasks()[idx]["deadline"]) or (r[-1] == r[-2]):
                     return r[-1]
 
-        for i in range(len(self.tasks)):
+        for i in range(len(self.task_dict)):
             # we set the wcet for all the tasks, check will be elsewhere
             logging.info("setting wcet for %d" % i)
-            self.tasks[i].task["wcet"] = wcrt(i)
+            self.tasks()[i].task["wcet"] = wcrt(i)
 
 def lcm_list(nums):
     """Calculates the lcm given a list of integers"""
+    if len(nums) == 0:
+        return 0
     if len(nums) == 1:
         return nums[0]
     else:
