@@ -241,6 +241,41 @@ class Scheduler(object):
             logging.info("setting wcet for %d" % i)
             self.tasks()[i].task["wcet"] = wcrt(i)
 
+
+def create_task():
+    getint = lambda x: input("insert %s\n" % x)
+    while True:
+        name = raw_input("name of the task\n")
+        cost = getint("cost")
+        deadline = getint("deadline")
+        period = getint("period")
+        
+        try:
+            t = Task(name, cost, deadline, period)
+        except InputError:
+            continue
+        else:
+            return t
+
+# TODO: use and abuse the automatic completion
+def interactive():
+    s = Scheduler()
+    actions = {
+        "a" : s.add_task(create_task()),
+        "d" : s.remove_task(lambda : input("name of the task")),
+        "s" : s.schedule(),
+        }
+
+    while True:
+        k = raw_input("what to do?")
+        if k == 'q':
+            return s
+
+        if k in actions.keys():
+            actions[k]
+        else:
+            print "don't understand" # continue is implicit here
+
 def lcm_list(nums):
     """Calculates the lcm given a list of integers"""
     if len(nums) == 0:
