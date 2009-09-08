@@ -5,8 +5,6 @@ import logging
 from copy import deepcopy
 from math import pow, ceil
 
-from errors import *
-
 class Task(object):
     """ Task object """
     def __init__(self, name, cost, deadline, period = None):
