@@ -2,14 +2,16 @@
 import ConfigParser
 import sys, getopt, logging
 from string import strip
+
 from schedu import *
+
 
 DEFAULTCONF = "example.conf"
 CONF_FILE = DEFAULTCONF
 VERBOSE = False
 GUI = False
-CONF = None
 
+# a very simple logger
 logging.basicConfig(stream = sys.stdout)
 
 def parse_tasksets(config):
@@ -30,14 +32,14 @@ def parse_tasksets(config):
         whole[s] = tset
     return whole
 
-def taskset_toini(tset):
+def taskset_toini(tset, output):
     """ Return the ini conf from a given task set """
     c = ConfigParser.ConfigParser()
     s = "taskset"
     c.add_section(s)
     for t, v in tset.task_dict.items():
         c.set(s, t, v.to_ini())
-    return c
+    return c.write(open(output, 'w'))
 
 def run(tasksets):
     for x in tasksets.items():

@@ -53,9 +53,10 @@ class Task(object):
 class TimeLine(object):
     """Representing the time line of events occurring in the hyperperiod """
 
-    def __init__(self, length):
+    def __init__(self, length, name = "taskset"):
         self.length = length
         self.timeline = [None] * length
+        self.name = name
         
     def __str__(self):
         return ', '.join(map(str, self.timeline))
@@ -71,6 +72,11 @@ class TimeLine(object):
 
             if self.timeline[i] == t['name']:
                 t['remaining'] -= 1
+
+    def to_svg(self):
+        """ A possible function going to svg must also know
+        All the deadlines and periods """
+        pass
 
 class Scheduler(object):
     """ Scheduler class, takes a list of tasks as input initially (which may also be empty)
