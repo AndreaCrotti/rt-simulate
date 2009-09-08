@@ -82,10 +82,7 @@ class Scheduler(object):
     Every time a new task is added the hyperperiod and the scheduling are recalculated """
     
     def __init__(self, tasks = [], name = "taskset"):
-        self.task_dict = {}
-        for n, t in [(t['name'], t) for t in tasks]:
-            self.task_dict[n] = t
-
+        self.task_dict = dict( (t['name'], t) for t in tasks)
         self.tasks = lambda : self.task_dict.values()
         self.name = name
         self.setup()
@@ -98,12 +95,12 @@ class Scheduler(object):
     def __len__(self):
         return len(self.task_dict)
 
-    def result():
+    def result(self):
         h = "HYPERPERIOD: %d" % self.hyper
         u = "TOTAL UTILISATION BOUND: " + str(round(self.utilisation_bound(), 3))
         a = "ALGORITHM CHOSEN: %s" % self.algo
-        t = "FINAL TIMELINE: %s" % str(self.timeline)
-        return '\n'.join([h, u, a, t])
+        t = "FINAL TIMELINE:\n %s" % str(self.timeline)
+        return '\n'.join([h, u, a, t]) + '\n\n'
 
     def setup(self):
         logging.info("setting up the task\n")
@@ -269,19 +266,33 @@ def create_task():
 # TODO: use and abuse the automatic completion
 def interactive():
     s = Scheduler()
+    def new_task():
+        t = create_task()
+        s.add_task(t)
+    
+    def rem_task():
+        i = raw_input("name of the task")
+        s.remove_task(i)
+    
+    def sched():
+        s.schedule()
+        print s
+        print s.result()
+
+    # Check that lambda is suitable here in this situation
     actions = {
-        "a" : s.add_task(create_task()),
-        "d" : s.remove_task(lambda : input("name of the task")),
-        "s" : s.schedule(),
+        "a" : new_task,
+        "d" : rem_task,
+        "s" : sched,
         }
 
     while True:
-        k = raw_input("what to do?")
+        k = raw_input("what to do?\n")
         if k == 'q':
             return s
 
         if k in actions.keys():
-            actions[k]
+            actions[k]()
         else:
             print "don't understand" # continue is implicit here
 

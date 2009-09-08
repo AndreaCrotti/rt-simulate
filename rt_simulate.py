@@ -49,7 +49,7 @@ def analyze(taskset):
     name, tset = taskset
     print "\n\t ANALYZING %s \n%s" % (name, str(tset))
     if not(tset.is_schedulable()):
-        print "this task set is not schedulable\n"
+        print "THIS TASK SET IS NOT SCHEDULABLE\n"
 
     tset.schedule() # scheduling anyway
     print tset.result()
@@ -75,9 +75,5 @@ if __name__ == '__main__':
         import svg
     # then finally start the engine, both frontends are working on the same
     # data and the same algorithms
-    from cli import run
     l = parse_tasksets(CONF_FILE)
     run(l)
-    
-    
-
