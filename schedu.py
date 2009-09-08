@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # TODO: write a better error handling (exceptions)
 # TODO: analyze the wcet even on not schedulable tasks
-
 import logging
 from copy import deepcopy
 from math import pow, ceil
@@ -11,21 +10,24 @@ from errors import *
 class Task(object):
     """ Task object """
     def __init__(self, name, cost, deadline, period = None):
+        if (cost < 0) or (deadline < 0) or (period < 0):
+            pos = "must have positive values"
+            logging.error(pos)
+            raise InputError(pos)
         if not period:
             period = deadline
-
         elif period < deadline:
-            err = "period must be greater or equal to deadline"
-            # Should raise some exceptions here
-            logging.error(err)
+            great = "period must be greater or equal to deadline"
+            logging.error(great)
             # in debug all the info
             logging.debug("error on object" + "\t,".join(map(str, [name, cost, deadline, period])))
-            raise InputError(err)
+            raise InputError(great)
         
         self.task = dict(name = name, cost = cost, deadline = deadline, period = period)
         self.task["wcet"] = cost
         self.remaining = cost # what left to do for the task
-        self.line = lambda sep: sep.join([str(self.task[x]) for x in ("cost", "deadline", "period")])
+        show_attrs = ("cost", "deadline", "period")
+        self.line = lambda sep: sep.join([str(self.task[x]) for x in show_attrs])
             
     def __getitem__(self, x):
         return self.task[x]
@@ -278,6 +280,7 @@ def create_task():
         try:
             t = Task(name, cost, deadline, period)
         except InputError:
+            print "error task not added"
             continue
         else:
             return t
