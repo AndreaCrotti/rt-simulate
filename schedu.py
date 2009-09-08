@@ -65,8 +65,10 @@ class TimeLine(object):
         self.length = length
         self.timeline = [dict(task = None, deadline = [], period = [], missed = []) 
                          for _ in range(length)]
+        self.last = length
+
     def __str__(self):
-        return '\n'.join([self.line(x) for x in range(self.length)])
+        return '\n'.join([self.line(x) for x in range(self.last)])
     
     def __setitem__(self, idx, val):
         self.timeline[idx]["task"] = val
@@ -85,8 +87,8 @@ class TimeLine(object):
         self.timeline[idx]["missed"].append(task)
 
     def set_deadline(self, idx, task):
-         " Setting the deadline for task"
-         self.timeline[idx]["deadline"].append(task)
+        " Setting the deadline for task"
+        self.timeline[idx]["deadline"].append(task)
 
     def set_period(self, idx, task):
         " Setting the period end for the task task"
@@ -178,8 +180,6 @@ class Scheduler(object):
 
     def schedule(self):
         """Finally schedule the task set, at this point priorities must be set already"""
-        logging.debug("starting schedule")
-
         cur_task = self.next_task()
         debmsg = "at step %d task %s is %s"
         for i in range(self.hyper):
@@ -191,6 +191,7 @@ class Scheduler(object):
                         self.timeline.set_missed(i, t['name'])
                         # we can stop calculating the timeline
                         logging.debug(debmsg % (i, t['name'], "not runnable"))
+                        self.timeline.last = i + 1
                         return False
                     self.timeline.set_deadline(i, t['name'])
                     t.runnable = False
