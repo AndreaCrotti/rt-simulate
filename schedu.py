@@ -217,8 +217,7 @@ class Scheduler(object):
         """ Worst case analysis checks for every task if the
         worst case response time is less than the deadline and returns
         True only if all tests are passed """
-        
-        # FIXME: check how would be possible an infinite loop with always growing values
+
         def wcrt(idx):
             """ Calculate the worst case response time of a particular task.
             If for any task wcrt(i) > di then the task set is surely not schedulable """
@@ -230,7 +229,7 @@ class Scheduler(object):
                              sum([int(ceil(float(r[-1]) / self.tasks()[h]["period"])) * self.tasks()[h]["cost"]\
                                   for h in range(idx) ])
                 r.append(next_value)
-                # Checking if passing the deadline or getting to fix point
+                # Checking if passing the deadline or getting to a fix point
                 if (r[-1] > self.tasks()[idx]["deadline"]) or (r[-1] == r[-2]):
                     return r[-1]
 
@@ -238,7 +237,6 @@ class Scheduler(object):
             # we set the wcet for all the tasks, check will be elsewhere
             logging.info("setting wcet for %d" % i)
             self.tasks()[i].task["wcet"] = wcrt(i)
-
 
 def create_task():
     getint = lambda x: input("insert %s\n" % x)

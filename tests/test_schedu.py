@@ -18,6 +18,7 @@ tests = {
     "harmonic" : [Task("t1", 3, 6), Task("t2", 3, 12), Task("t3", 6, 24)]
     }
 
+# TODO check how to test __init__(s)
 class TestTask(unittest.TestCase):
     def setUp(self):
         pass

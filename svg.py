@@ -10,7 +10,6 @@ def initialize():
     # svgfig.canvas_defaults["font-family"]
     canvas().attr["viewBox"] = "0 0 800 600"
 
-
 def run(tasksets):
     pass
 
