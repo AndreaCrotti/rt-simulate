@@ -111,7 +111,7 @@ class Scheduler(object):
         h = "HYPERPERIOD: %d" % self.hyper
         u = "TOTAL UTILISATION BOUND: " + str(round(self.utilisation_bound(), 3))
         a = "ALGORITHM CHOSEN: %s" % self.algo
-        t = "FINAL TIMELINE:\n %s" % str(self.timeline)
+        t = "TIMELINE:\n %s" % str(self.timeline)
         return '\n'.join([h, u, a, t]) + '\n\n'
 
     def setup(self):

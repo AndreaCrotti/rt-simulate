@@ -34,6 +34,10 @@ def make_line(dim):
     
     test_svg(s)
 
+def line(dim):
+    l = Line("line", 0.0, 0.0, dim, 0.0)
+    return l
+
 def test_svg(image):
     f = os.tempnam() + ".svg"
     canvas(image, viewBox = "0 0 800 600").save(f)
@@ -42,4 +46,4 @@ def test_svg(image):
 
 if __name__ == '__main__':
     initialize()
-    make_line(10)
+    test_svg(line(10.0))

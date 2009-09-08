@@ -56,6 +56,9 @@ def analyze(taskset):
     if GUI:
         svg.write(tset)
 
+def usage():
+    print """usage : ./rt_simulate.py [-c conf-file] [-dvhg]"""
+
 if __name__ == '__main__':
     opts, args = getopt.getopt(sys.argv[1:], "dvhc:g")
 
@@ -64,6 +67,7 @@ if __name__ == '__main__':
             logging.getLogger().setLevel(logging.INFO)
         if o == "-h":
             usage()
+            sys.exit(0)
         if o == "-c":
             CONF_FILE = a
         if o == "-g":
@@ -73,7 +77,6 @@ if __name__ == '__main__':
 
     if GUI:
         import svg
-    # then finally start the engine, both frontends are working on the same
-    # data and the same algorithms
+
     l = parse_tasksets(CONF_FILE)
     run(l)
