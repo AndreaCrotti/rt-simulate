@@ -45,6 +45,9 @@ class Task(object):
     def is_deadline(self, x):
         return (x != 0) and (x % self.task["deadline"] == 0)
 
+    def is_period(self, x):
+        return (x != 0) and (x % self.task["period"] == 0)
+
     def is_done(self):
         return self.remaining <= 0
 
@@ -55,13 +58,22 @@ class TimeLine(object):
     """ Class of the time line of events occurring in the hyperperiod """
     def __init__(self, length):
         self.length = length
-        self.timeline = [None] * length
+        self.timeline = [dict(task = None, deadline = [], period = []) 
+                         for _ in range(length)]
         
     def __str__(self):
-        return ', '.join(map(str, self.timeline))
+        return ', '.join([ str(t['task']) for t in self.timeline ])
     
     def __setitem__(self, idx, val):
-        self.timeline[idx] = val
+        self.timeline[idx]["task"] = val
+
+    def set_deadline(self, idx, task):
+         " Setting the deadline for task"
+         self.timeline[idx]["deadline"].append(task)
+
+    def set_period(self, idx, task):
+        " Setting the period end for the task task"
+        self.timeline[idx]["period"].append(task)
 
     def time(self, task):
         t = deepcopy(task) # don't want to modify the original task
@@ -130,8 +142,13 @@ class Scheduler(object):
         self.task_dict.pop(task_name)
 
     def add_task(self, task):
-        logging.info("adding task %s" % task['name'])
-        self.task_dict[task['name']] = task
+        name = task['name']
+        if name in self.task_dict.keys():
+            print "a task called %s is already present, not adding\n"
+            return
+
+        logging.info("adding task %s" % name)
+        self.task_dict[name] = task
         self.setup() # Too much effort recalculating everything every time??
 
     def queue(self):
@@ -159,11 +176,13 @@ class Scheduler(object):
                         # here we can stop calculating the timeline
                         return False
                     t.reset()
-
+                    self.timeline.set_deadline(i, t['name'])
 #                     # this should be always true if checks are working correctly
 #                     assert(t.is_done())
 #                     t.reset()
-            
+                if t.is_period(i):
+                    self.timeline.set_period(i, t['name'])
+                    
             cur_task = self.next_task() # should not need every time
             if not(cur_task):
                 continue # just go to the next position on the timeline
