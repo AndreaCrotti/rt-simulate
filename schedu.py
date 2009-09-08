@@ -10,12 +10,14 @@ from errors import *
 class Task(object):
     """ Task object """
     def __init__(self, name, cost, deadline, period = None):
-        if (cost < 0) or (deadline < 0) or (period < 0):
+        if (cost < 0) or (deadline < 0):
             pos = "must have positive values"
             logging.error(pos)
             raise InputError(pos)
+
         if not period:
             period = deadline
+
         elif period < deadline:
             great = "period must be greater or equal to deadline"
             logging.error(great)
@@ -28,6 +30,7 @@ class Task(object):
         self.remaining = cost # what left to do for the task
         show_attrs = ("cost", "deadline", "period")
         self.line = lambda sep: sep.join([str(self.task[x]) for x in show_attrs])
+        self.runnable = True
             
     def __getitem__(self, x):
         return self.task[x]
@@ -37,7 +40,7 @@ class Task(object):
         rest = self.line(", ")
         rest += "\t wcet: %d" % self.task["wcet"]
         return ": ".join((n, rest))
-        
+
     def to_ini(self):
         return self.line(", ")
 
@@ -45,7 +48,9 @@ class Task(object):
         return (self.task["wcet"] <= self.task["deadline"])
 
     def is_deadline(self, x):
-        return (x != 0) and (x % self.task["deadline"] == 0)
+        # here the formula is more complicated, we must make sure that:
+        # (x - deadline) == k * period, where k can also be zero (to get the first deadline
+        return (x != 0) and (((x - self.task["deadline"]) % self.task["period"]) == 0)
 
     def is_period(self, x):
         return (x != 0) and (x % self.task["period"] == 0)
@@ -60,14 +65,26 @@ class TimeLine(object):
     """ Class of the time line of events occurring in the hyperperiod """
     def __init__(self, length):
         self.length = length
-        self.timeline = [dict(task = None, deadline = [], period = []) 
+        self.timeline = [dict(task = None, deadline = [], period = [], missed = []) 
                          for _ in range(length)]
-        
     def __str__(self):
-        return ', '.join([ str(t['task']) for t in self.timeline ])
+        return '\n'.join([self.line(x) for x in range(self.length)])
     
     def __setitem__(self, idx, val):
         self.timeline[idx]["task"] = val
+
+    def line(self, x):
+        res = ': '.join([str(x), str(self.timeline[x]['task'])]) + '\t'
+        if self.timeline[x]['deadline']:
+            res += "deadlines: " + str(self.timeline[x]['deadline']) + "\t"
+        if self.timeline[x]['period']:
+            res += "periods end: " + str(self.timeline[x]['period']) + "\t"
+        if self.timeline[x]['missed']:
+            res += "deadline missed for tasks:" + str(self.timeline[x]['missed'])
+        return res
+
+    def set_missed(self, idx, task):
+        self.timeline[idx]["missed"].append(task)
 
     def set_deadline(self, idx, task):
          " Setting the deadline for task"
@@ -85,11 +102,6 @@ class TimeLine(object):
 
             if self.timeline[i] == t['name']:
                 t['remaining'] -= 1
-
-    def to_svg(self):
-        """ A possible function going to svg must also know
-        All the deadlines and periods """
-        pass
 
 class Scheduler(object):
     """ Scheduler class, takes a list of tasks as input initially (which may also be empty)
@@ -155,7 +167,7 @@ class Scheduler(object):
 
     def queue(self):
         """ Returning a sorted priority list of unfinished jobs """
-        q = [ task for task in self.tasks() if not (task.is_done()) ]
+        q = [ task for task in self.tasks() if (not (task.is_done())) and (task.runnable) ]
         q.sort(key = lambda t: t[self.sort_key]) # sorting here because the algorithm could change adding new tasks
         return q
 
@@ -171,19 +183,26 @@ class Scheduler(object):
         logging.debug("starting schedule")
 
         cur_task = self.next_task()
+        debmsg = "at step %d task %s is %s"
         for i in range(self.hyper):
             for t in self.tasks():
                 # reset is done when the period expires
                 # but we must check if done when deadline expires
                 if t.is_deadline(i):
                     if not(t.is_done()):
+                        self.timeline.set_missed(i, t['name'])
                         # we can stop calculating the timeline
+                        logging.debug(debmsg % (i, t['name'], "not runnable"))
                         return False
                     self.timeline.set_deadline(i, t['name'])
+                    t.runnable = False
+                    t.reset()
 
                 if t.is_period(i):
-                    t.reset()
                     self.timeline.set_period(i, t['name'])
+                    # in the case period = deadline the variable runnable goes back to true
+                    logging.debug(debmsg % (i, t['name'], "runnable"))
+                    t.runnable = True
                     
             cur_task = self.next_task() # should not need every time
             if not(cur_task):
