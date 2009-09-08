@@ -1,6 +1,7 @@
 #!/usr/bin/env python
-# TODO: write the logging mechanism
 # TODO: write a better error handling (exceptions)
+# TODO: analyze the wcet even on not schedulable tasks
+
 import logging
 from copy import deepcopy
 from math import pow, ceil
@@ -49,14 +50,12 @@ class Task(object):
 
     def reset(self):
         self.remaining = self["cost"]
-
+        
 class TimeLine(object):
-    """Representing the time line of events occurring in the hyperperiod """
-
-    def __init__(self, length, name = "taskset"):
+    """ Class of the time line of events occurring in the hyperperiod """
+    def __init__(self, length):
         self.length = length
         self.timeline = [None] * length
-        self.name = name
         
     def __str__(self):
         return ', '.join(map(str, self.timeline))
@@ -82,12 +81,13 @@ class Scheduler(object):
     """ Scheduler class, takes a list of tasks as input initially (which may also be empty)
     Every time a new task is added the hyperperiod and the scheduling are recalculated """
     
-    def __init__(self, tasks = []):
+    def __init__(self, tasks = [], name = "taskset"):
         self.task_dict = {}
         for n, t in [(t['name'], t) for t in tasks]:
             self.task_dict[n] = t
 
         self.tasks = lambda : self.task_dict.values()
+        self.name = name
         self.setup()
 
     def __str__(self):
