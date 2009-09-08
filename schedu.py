@@ -171,16 +171,16 @@ class Scheduler(object):
         cur_task = self.next_task()
         for i in range(self.hyper):
             for t in self.tasks():
+                # reset is done when the period expires
+                # but we must check if done when deadline expires
                 if t.is_deadline(i):
                     if not(t.is_done()):
-                        # here we can stop calculating the timeline
+                        # we can stop calculating the timeline
                         return False
-                    t.reset()
                     self.timeline.set_deadline(i, t['name'])
-#                     # this should be always true if checks are working correctly
-#                     assert(t.is_done())
-#                     t.reset()
+
                 if t.is_period(i):
+                    t.reset()
                     self.timeline.set_period(i, t['name'])
                     
             cur_task = self.next_task() # should not need every time
