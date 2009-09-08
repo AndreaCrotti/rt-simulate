@@ -7,9 +7,8 @@ from math import pow, ceil
 
 from errors import *
 
-
 class Task(object):
-    """ This class define a taks"""
+    """ Task object """
     def __init__(self, name, cost, deadline, period = None):
         if not period:
             period = deadline
@@ -34,7 +33,7 @@ class Task(object):
         n = self.task["name"]
         rest = self.line(", ")
         rest += "\t wcet: %d" % self.task["wcet"]
-        return ": ".join((n,rest))
+        return ": ".join((n, rest))
         
     def to_ini(self):
         return self.line(", ")
@@ -56,7 +55,7 @@ class TimeLine(object):
 
     def __init__(self, length):
         self.length = length
-        self.timeline = [None for x in range(length)]
+        self.timeline = [None] * length
         
     def __str__(self):
         return ', '.join(map(str, self.timeline))
@@ -86,12 +85,19 @@ class Scheduler(object):
         self.setup()
 
     def __str__(self):
+        " Task set is only a dict of tasks initially "
         t = '\n'.join([ str(t) for t in self.tasks() ])
-        u = "TOTAL UTILISATION BOUND: " + str(round(self.utilisation_bound(), 3))
-        return '\n'.join([t, u])
+        return t
 
     def __len__(self):
         return len(self.task_dict)
+
+    def result():
+        h = "HYPERPERIOD: %d" % self.hyper
+        u = "TOTAL UTILISATION BOUND: " + str(round(self.utilisation_bound(), 3))
+        a = "ALGORITHM CHOSEN: %s" % self.algo
+        t = "FINAL TIMELINE: %s" % str(self.timeline)
+        return '\n'.join([h, u, a, t])
 
     def setup(self):
         logging.info("setting up the task\n")
@@ -139,26 +145,27 @@ class Scheduler(object):
             return None
 
     def schedule(self):
-        """Finally schedule the task set, only possible when the priorities are set"""
-        # Timeline must is long as the hyperperiod, we go through it until we schedule everything
-        # Timeline is just a list long as the hyperperiod initially set to 0 and then filled with tasks numbers
-        # a cycle where at every deadline we check again the priorities (preemption possible)
-        
+        """Finally schedule the task set, at this point priorities must be set already"""
+        logging.debug("starting schedule")
+
         cur_task = self.next_task()
-        
         for i in range(self.hyper):
-            # get a new task only when one deadline is found
-            recalc = False
             for t in self.tasks():
                 if t.is_deadline(i):
-                    # this should be always true if checks are working correctly
-                    assert(t.is_done())
+                    if not(t.is_done()):
+                        # here we can stop calculating the timeline
+                        return False
                     t.reset()
+
+#                     # this should be always true if checks are working correctly
+#                     assert(t.is_done())
+#                     t.reset()
             
             cur_task = self.next_task() # should not need every time
             if not(cur_task):
                 continue # just go to the next position on the timeline
 
+            logging.debug("next task to schedule is %s" % cur_task['name'])
             self.timeline[i] = cur_task["name"]
             cur_task.remaining -= 1
         return True
