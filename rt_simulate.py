@@ -57,12 +57,20 @@ def analyze(taskset):
         svg.write(tset)
 
 def usage():
-    print """usage : ./rt_simulate.py [-c conf-file] [-dvhg]"""
+    print """usage : ./rt_simulate.py [-c conf-file] [-dvhgi]
+-c    get the configuration file
+-d    debug mode
+-v    verbose mode
+-h    print this help
+-i    interactive mode
+"""
 
 if __name__ == '__main__':
-    opts, args = getopt.getopt(sys.argv[1:], "dvhc:g")
+    opts, args = getopt.getopt(sys.argv[1:], "dvhc:gi")
 
     for o, a in opts:
+        if o == '-i':
+            interactive()
         if o == "-v":
             logging.getLogger().setLevel(logging.INFO)
         if o == "-h":

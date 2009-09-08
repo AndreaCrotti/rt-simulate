@@ -300,18 +300,21 @@ def interactive():
 
     # Check that lambda is suitable here in this situation
     actions = {
-        "a" : new_task,
-        "d" : rem_task,
-        "s" : sched,
+        "a" : [new_task, "add a new task"],
+        "d" : [rem_task, "remove an existing task"], # must also modify timeline then
+        "s" : [sched, "schedule the task set and show it"]
         }
+    
+    message = '\n'.join([':\t'.join([k, actions[k][1]]) for k in actions.keys()])
 
     while True:
-        k = raw_input("what to do?\n")
+        print message
+        k = raw_input("what to do? (q to exit)\n")
         if k == 'q':
             return s
 
         if k in actions.keys():
-            actions[k]()
+            actions[k][0]()
         else:
             print "don't understand" # continue is implicit here
 

@@ -2,33 +2,29 @@
                             =============
 
 Author: andrea crotti <andrea.crotti.0@gmail.com>
-Date: 2009-09-07 15:37:42 CEST
+Date: 2009-09-08 18:55:04 CEST
 
 
 Table of Contents
 =================
 1 implement the worst case response time algorithm 
-2 write the graphical interface with wxWidget 
-3 test deeply all the possible error conditions 
-4 General concepts 
-5 GUI 
-    5.1 SVGfig 
-        5.1.1 Doc 
-    5.2 wxPython 
-        5.2.1 Functions 
-        5.2.2 Implementation 
-        5.2.3 Hints 
-        5.2.4 Debugging 
-6 Languages used 
-7 Frameworks 
-8 Language table 
-9 Theory summary 
-    9.1 STATIC scheduling algorithm 
-    9.2 Fixed priority scheduling 
-    9.3 Dynamic priority scheduling algorithms: 
-        9.3.1 Deadline monotonic 
-        9.3.2 Rate monotonic 
-    9.4 Analysis 
+2 write an automatic generator + tester or random task sets 
+3 Description and usage 
+4 GUI 
+    4.1 FIG format
+    4.2 SVGfig 
+        4.2.1 Doc 
+    4.3 wxPython
+5 Languages used 
+6 Language table 
+7 Theory summary 
+8 Algorithms 
+    8.1 STATIC scheduling algorithm 
+    8.2 Fixed priority scheduling 
+    8.3 Dynamic priority scheduling algorithms: 
+        8.3.1 Deadline monotonic 
+        8.3.2 Rate monotonic 
+    8.4 Analysis 
 
 
 1 DONE implement the worst case response time algorithm 
@@ -37,58 +33,46 @@ Table of Contents
   - CLOSING NOTE [2009-08-31 Mon 09:31] 
     Algorithm working on simple cases
 
-2 TODO write the graphical interface with wxWidget 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  
+2 TODO write an automatic generator + tester or random task sets 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-3 TODO test deeply all the possible error conditions 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-4 General concepts 
-~~~~~~~~~~~~~~~~~~~
+3 Description and usage 
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 This program will show interactively how some real time algorithms work.
-It works as:
-1. task a set of tasks as input
-2. choose a scheduling algorithm
+In general it:
+1. takes a set of tasks as input
+2. chooses a scheduling algorithm
 3. check if is schedulable or not
 4. return the scheduled hyperperiod if possible
 
-Tasks are taken from the command line or from a configuration file.
+Tasks are taken from a configuration file.
 
-In plus there will be an interactive modality (cli or GUI) where those operations should be possible:
+In plus there will is an interactive modality where those operations should be possible:
 - add a new task
 - remove a task
 - see the timeline
 
-[This] is the official site, more information on laboratories [here].
+To start it simply ./rt_simulate.py -i
 
-Using a MVC pattern to design the application, which must be easily adapt to new algorithms and data types.
+[This] is the official site, more information on laboratories [here].
 
 
 [This]: http://dit.unitn.it/~abeni/RTOS/index.html
 [here]: http://dit.unitn.it/~abeni/RTOS/lab.html
 
-5 GUI 
+4 GUI 
 ~~~~~~
   
-  ** FIG format
-   [fig format description]
-   See the [xfig user manual]
-   Must find a python library able to translate in xfig format.
-   Here is the format: [fig format], [txt fig format]
-   
 
-   [fig format description]: http://homepage.usask.ca/~ijm451/fig/
-   [xfig user manual]: http://www-epb.lbl.gov/xfig/frm_drawing.html
-   [fig format]: http://www-epb.lbl.gov/xfig/fig-format.html
-   [txt fig format]: file:fig_format.txt
+4.1 FIG format :ARCHIVE:
+========================
 
-5.1 SVGfig 
+4.2 SVGfig 
 ===========
    
 
-5.1.1 Doc 
+4.2.1 Doc 
 ----------
     [svgfig tutorial], one big library composed of only one file.
     Possibility to export in different formats
@@ -103,81 +87,41 @@ Using a MVC pattern to design the application, which must be easily adapt to new
     [learning by coding]: http://www.datenverdrahten.de/svglbc/
     [table of colors available]: http://www.december.com/html/spec/colorspottable.html
 
-5.2 wxPython 
-=============
+4.3 wxPython :ARCHIVE:
+======================
 
-5.2.1 Functions 
-----------------
-    One simple menubar where you can:
-    - load a configuration file
-    - run the scheduling
-    - check if everything is working
-    - add a new task to the current task set (this enable automatic redrawing)
-      
-    The main window must contain the hyperperiod scheduling, made of blocks of different colors and lines for the deadlines.
 
-5.2.2 Implementation 
----------------------
-      
-    We'll use a *wxSizer* object, allows to place objects which will be automatically resized or replaced.
-    Important to remember that sizer != parent object.
-    
-    After the layout is ready (box/grid or other) we set up everything with:
-    1. window.SetSizer(sizer)
-    2. window.SetAutoLayout(true)
-    3. sizer.Fit(window)
-
-5.2.3 Hints 
-------------
-
-    When taking input from user *wxValidator* is needed to check if the input is correct
-    (Note: Your wxValidator sub-class must implement the wxValidator.Clone() method.)
-
-5.2.4 Debugging 
-----------------
-    A nice way to debug is using pycrust
-
-6 Languages used 
+5 Languages used 
 ~~~~~~~~~~~~~~~~~
   - python (for the gui and control interface)
-  - C/pyrex extension (for the algorithm engine)
-
-7 Frameworks 
-~~~~~~~~~~~~~
-  - wxgtk/gtk/dialog?
-  - [How to learn wxpython]
     
 
-  [How to learn wxpython]: http://wiki.wxpython.org/How%20to%20Learn%20wxPython
-
-8 Language table 
+6 Language table 
 ~~~~~~~~~~~~~~~~~
+  ACRONYM      EXPLANATION                   
+ ------------+------------------------------
+  Task         Schedulable entity            
+  Preemptive   OS can regain control of cpu  
+  WCET         Worst Case Execution Time     
 
-    Task         Schedulable entity            
-    Preemptive   OS can regain control of cpu  
-    WCET         Worst Case Execution Time     
-
-9 Theory summary 
+7 Theory summary 
 ~~~~~~~~~~~~~~~~~
   OS kernel creates the illusion of multiple CPUs, concurrency is implemented by multiplexing tasks.
   Tasks are associated to temporal constraints (*deadlines*)
   
   Scheduler is responsible for selecting the tasks to execute.
-  
-Algorithms:
 
-9.1 STATIC scheduling algorithm 
+8 Algorithms 
+~~~~~~~~~~~~~
+
+8.1 STATIC scheduling algorithm 
 ================================
    - Time axis divided in time slots
    - Slots statically allocated to the tasks
    - $\tau$ = *gcd*, $T$ = *lcm*
    - Very simple implementation, no operating system needed
 
-     *NOT VERY CLEAR HOW TO IMPLEMENT THIS, only frequencies and timings in the slides.*
-     What's the deadline in this case?
-     In general enough to fire a timer every *minor cycle*.
-
-9.2 Fixed priority scheduling 
+8.2 Fixed priority scheduling 
 ==============================
    Very simple /preemptive/ scheduling algorithm.
    - every task has a fixed priority p_i
@@ -186,7 +130,7 @@ Algorithms:
      To have a better response of the system the priority must be chosen dynamically.
      So the problem becomes, how to assign priorities to manage to have a schedulable set of tasks?
 
-9.3 Dynamic priority scheduling algorithms: 
+8.3 Dynamic priority scheduling algorithms: 
 ============================================
    Given a set, how to assign priorities?
    Two possible objectives:
@@ -204,18 +148,18 @@ Algorithms:
      If we consider periodic tasks with offsets, then /there is no optimal priority assignment possible/
 
 
-     [rate monotonic]: sec-9.3.2
-     [deadline monotonic]: sec-9.3.1
+     [rate monotonic]: sec-8.3.2
+     [deadline monotonic]: sec-8.3.1
 
-9.3.1 Deadline monotonic 
+8.3.1 Deadline monotonic 
 -------------------------
     Shorter period $\rightarrow$ higher priority.
 
-9.3.2 Rate monotonic 
+8.3.2 Rate monotonic 
 ---------------------
     Shorter relative deadline $\rightarrow$ higher priority.
 
-9.4 Analysis 
+8.4 Analysis 
 =============
    Given a set of tasks, how can we make sure that is possible to schedule them?
    

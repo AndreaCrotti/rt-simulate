@@ -18,14 +18,14 @@ In general it:
 
 Tasks are taken from a configuration file.
 
-In plus there will be an interactive modality (cli or GUI) where those operations should be possible:
+In plus there will is an interactive modality where those operations should be possible:
 - add a new task
 - remove a task
 - see the timeline
 
-[[http://dit.unitn.it/~abeni/RTOS/index.html][This]] is the official site, more information on laboratories [[http://dit.unitn.it/~abeni/RTOS/lab.html][here]].
+To start it simply ./rt_simulate.py -i
 
-Using a MVC pattern to design the application, which must be easily adapt to new algorithms and data types.
+[[http://dit.unitn.it/~abeni/RTOS/index.html][This]] is the official site, more information on laboratories [[http://dit.unitn.it/~abeni/RTOS/lab.html][here]].
 
 * GUI
   
@@ -75,7 +75,6 @@ Using a MVC pattern to design the application, which must be easily adapt to new
 
 * Languages used
   - python (for the gui and control interface)
-  - C/pyrex extension (for the algorithm engine)
     
 * Language table
 | ACRONYM    | EXPLANATION                  |
