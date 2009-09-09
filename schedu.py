@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # TODO: write a better error handling (exceptions)
 # TODO: analyze the wcet even on not schedulable tasks
 import logging
@@ -99,6 +100,10 @@ class TimeLine(object):
         " Setting the period end for the task task"
         self.timeline[idx]["period"].append(task)
 
+    def remove_task(self, task):
+        " Remove completely a task from the timeline"
+        pass
+
     def time(self, task):
         t = deepcopy(task) # don't want to modify the original task
         for i in range(self.length):
@@ -155,19 +160,22 @@ class Scheduler(object):
             self.algo = "rate monotonic"
             return "period" # using rate monotonic
     
+    # TODO: must also modify the deadline,
     def remove_task(self, task_name):
         # should be only one
         logging.info("removing task %s" % task_name)
         self.task_dict.pop(task_name)
+        self.setup()
 
     def add_task(self, task):
         name = task['name']
         if name in self.task_dict.keys():
-            print "a task called %s is already present, not adding\n"
+            print "a task called %s is already present, not adding\n" % name
             return
 
         logging.info("adding task %s" % name)
         self.task_dict[name] = task
+        # FIXME: something missing here, priorities are not evaluated correctly
         self.setup() # Too much effort recalculating everything every time??
 
     def queue(self):
@@ -316,6 +324,7 @@ def interactive():
     
     def rem_task():
         i = raw_input("name of the task")
+        # FIXME: not working correctly
         s.remove_task(i)
     
     def sched():
@@ -341,7 +350,7 @@ def interactive():
         if k in actions.keys():
             actions[k][0]()
         else:
-            print "don't understand" # continue is implicit here
+            print "I didn't understand, try again" # continue is implicit here
 
 def lcm_list(nums):
     """Calculates the lcm given a list of integers"""

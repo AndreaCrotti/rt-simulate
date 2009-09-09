@@ -2,6 +2,7 @@
 from getopt import getopt, GetoptError
 from random import randrange
 from sys import argv, exit
+from math import ceil
 
 from rt_simulate import taskset_toini
 from schedu import Scheduler, Task
@@ -9,15 +10,16 @@ from schedu import Scheduler, Task
 MAXOFF = 5
 DEF_RM = False
 DEF_SCHED = True
+DEF_DENSITY = 5
 
-def gen_taskset(mincost = 1, maxcost = 5, minperiod = 5, maxperiod = 15, density = 5,
+def gen_taskset(density = DEF_DENSITY,
                 rate_monotonic = DEF_RM, schedulable = DEF_SCHED):
     """ Generates a task set given the parameters """
     s = Scheduler()
     i = 0
     while True:
-        cost = randrange(mincost, maxcost)
-        period = randrange(minperiod, maxperiod) # careful to what is passed in input
+        period = randrange(10, 20)
+        cost = int(ceil(float(period) / density))
 
         if rate_monotonic:
             deadline = period
@@ -35,23 +37,25 @@ def gen_taskset(mincost = 1, maxcost = 5, minperiod = 5, maxperiod = 15, density
     return s
 
 def usage():
-    print """usage: ./gen_tasks.py [-c conf-file] [-n]
+    print """usage: ./gen_tasks.py [-c conf-file] [-n] [-r] [-d (1..10]
     -c  conf-file:   writes to conf-file (default to test.conf)
     -n           :   creates a non schedulable task set
     -r           :   creates a rate monotonic task set
+    -d           :   desired tasks number, 1=max tasks, 10= min tasks
     -h           :   prints this help
     """
     exit(0)
 
 if __name__ == '__main__':
     try:
-        opts, args = getopt(argv[1:], "c:nhr")
+        opts, args = getopt(argv[1:], "c:nhrd:")
     except GetoptError:
         usage()
         
     output = "test.conf"
     sched = DEF_SCHED
     rm = DEF_RM
+    dens = DEF_DENSITY
 
     for o, a in opts:
         if o == "-h":
@@ -62,8 +66,10 @@ if __name__ == '__main__':
             sched = False
         if o == "-r":
             rm = True
+        if o == "-d":
+            dens = int(a)
     
-    tset = gen_taskset(schedulable = sched, rate_monotonic = rm)
+    tset = gen_taskset(schedulable = sched, rate_monotonic = rm, density = dens)
     print "taskset\n %s" % str(tset)
     print "writing taskset to %s" % output
     taskset_toini(tset, output)
