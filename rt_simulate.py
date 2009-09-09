@@ -5,6 +5,8 @@ from string import strip
 
 from schedu import *
 
+# TODO: adding colored output, see http://stackoverflow.com/questions/287871/print-in-terminal-with-colors-using-python
+# and also http://code.activestate.com/recipes/574451/
 
 DEFAULTCONF = "example.conf"
 CONF_FILE = DEFAULTCONF

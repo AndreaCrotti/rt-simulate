@@ -3,7 +3,9 @@
 # TODO: analyze the wcet even on not schedulable tasks
 import logging
 from copy import deepcopy
-from math import pow, ceil
+from math import ceil
+
+from errors import *
 
 class Task(object):
     """ Task object """
