@@ -13,6 +13,15 @@ CONF_FILE = DEFAULTCONF
 VERBOSE = False
 GUI = False
 
+COLORS = {
+    "purple" : '\033[95m',
+    "blue" : '\033[94m',
+    "green" : '\033[92m',
+    "yellow" : '\033[93m',
+    "red" : '\033[91m',
+    "disable" : '\033[0m'
+    }
+
 # a very simple logger
 logging.basicConfig(stream = sys.stdout)
 
