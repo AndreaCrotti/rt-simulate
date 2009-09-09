@@ -4,6 +4,7 @@
 import logging
 from copy import deepcopy
 from math import ceil
+import csv
 
 from errors import *
 
@@ -36,30 +37,30 @@ class Task(object):
         return self.task[x]
 
     def __str__(self):
-        n = self.task["name"]
-        rest = self.line(", ")
-        rest += "\t wcet: %d" % self.task["wcet"]
-        return ": ".join((n, rest))
+        n = self.task['name']
+        rest = self.line(', ')
+        rest += '\t wcet: %d' % self.task['wcet']
+        return ': '.join((n, rest))
 
     def to_ini(self):
-        return self.line(", ")
+        return self.line(', ')
 
     def is_schedulable(self):
-        return (self.task["wcet"] <= self.task["deadline"])
+        return (self.task['wcet'] <= self.task['deadline'])
 
     def is_deadline(self, x):
         # here the formula is more complicated, we must make sure that:
         # (x - deadline) == k * period, where k can also be zero (to get the first deadline
-        return (x != 0) and (((x - self.task["deadline"]) % self.task["period"]) == 0)
+        return (x != 0) and (((x - self.task['deadline']) % self.task['period']) == 0)
 
     def is_period(self, x):
-        return (x != 0) and (x % self.task["period"] == 0)
+        return (x != 0) and (x % self.task['period'] == 0)
 
     def is_done(self):
         return self.remaining <= 0
 
     def reset(self):
-        self.remaining = self["cost"]
+        self.remaining = self['cost']
         
 class TimeLine(object):
     """ Class of the time line of events occurring in the hyperperiod """
@@ -68,6 +69,8 @@ class TimeLine(object):
         self.timeline = [dict(task = None, deadline = [], period = [], missed = []) 
                          for _ in range(length)]
         self.last = length
+        # TODO: auto exporting to csv in the timeline abstraction
+        self.header = ["INDEX", "TASK", "DEADLINES", "PERIODS", "MISSED DEADLINES"]
 
     def __str__(self):
         return '\n'.join([self.line(x) for x in range(self.last)])
@@ -210,7 +213,7 @@ class Scheduler(object):
                 continue # just go to the next position on the timeline
 
             logging.debug("next task to schedule is %s" % cur_task['name'])
-            self.timeline[i] = cur_task["name"]
+            self.timeline[i] = cur_task['name']
             cur_task.remaining -= 1
         return True
     
@@ -240,7 +243,6 @@ class Scheduler(object):
         True: schedulable
         False: not schedulable
         None: don't know"""
-        
         u_least = ulub(len(self))
         u_bound = self.utilisation_bound()
         
