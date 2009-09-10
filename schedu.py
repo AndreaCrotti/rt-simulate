@@ -74,16 +74,14 @@ class Task(object):
         
 class TimeLine(object):
     """ Class of the time line of events occurring in the hyperperiod """
-    def __init__(self, length):
-        self.length = length
-        self.timeline = [dict(task = None, deadline = [], period = [], missed = []) 
-                         for _ in range(length)]
-        self.last = length
+    def __init__(self):
+        self.task_line = dict(task = None, deadline = [], period = [], missed = [])
+        self.timeline = []
         # TODO: auto exporting to csv in the timeline abstraction
         self.header = ["INDEX", "TASK", "DEADLINES", "PERIODS", "MISSED DEADLINES"]
 
     def __str__(self):
-        return '\n'.join([self.line(x) for x in range(self.last)])
+        return '\n'.join([self.line(x) for x in range(len(self.timeline))])
     
     def __setitem__(self, idx, val):
         self.timeline[idx]["task"] = val
@@ -98,26 +96,21 @@ class TimeLine(object):
             res += "deadline missed for tasks:" + str(self.timeline[x]['missed'])
         return res
 
-    def set_missed(self, idx, task):
-        self.timeline[idx]["missed"].append(task)
+    def add_task(self, task):
+#        print "adding task %s to timeline" % task
+        task_line = dict(task = task, deadline = [], period = [], missed = [])
+        self.timeline.append(task_line)
 
-    def set_deadline(self, idx, task):
+    def set_missed(self, task):
+        self.timeline[-1]["missed"].append(task)
+
+    def set_deadline(self, task):
         " Setting the deadline for task"
-        self.timeline[idx]["deadline"].append(task)
+        self.timeline[-1]["deadline"].append(task)
 
-    def set_period(self, idx, task):
+    def set_period(self, task):
         " Setting the period end for the task task"
-        self.timeline[idx]["period"].append(task)
-
-    def time(self, task):
-        " Returns the effective time that took to the task to be executed "
-        t = deepcopy(task) # don't want to modify the original task
-        for i in range(self.length):
-            if t.is_done():
-                return i
-
-            if self.timeline[i] == t['name']:
-                t['remaining'] -= 1
+        self.timeline[-1]["period"].append(task)
 
 class Scheduler(object):
     """ Scheduler class, takes a list of tasks as input initially (which may also be empty)
@@ -145,6 +138,7 @@ class Scheduler(object):
         return '\n'.join([h, u, a, t]) + '\n\n'
 
     def refresh(self):
+        " Refreshing the scheduler informations "
         logging.info("refreshing the taskset")
         self.hyper = self.hyper_period()
         self.sort_key = self.select_algorithm()
@@ -172,14 +166,12 @@ class Scheduler(object):
         self.refresh()
 
     def add_task(self, task):
+        " Adding a task to the taskset "
         name = task['name']
-        if name in self.task_dict.keys():
-            print "a task called %s is already present, not adding\n" % name
-            return
-
-        logging.info("adding task %s" % name)
-        self.task_dict[name] = task
-        self.refresh()
+        if not(name in self.task_dict.keys()):
+            logging.info("adding task %s" % name)
+            self.task_dict[name] = task
+            self.refresh()
 
     def queue(self):
         """ Returning a sorted priority list of unfinished jobs """
@@ -196,38 +188,43 @@ class Scheduler(object):
 
     def schedule(self):
         """Finally schedule the task set, at this point priorities must be set already"""
-        self.timeline = TimeLine(self.hyper) # faster methods?
-        cur_task = self.next_task()
+        self.refresh()
+        self.timeline = TimeLine() # faster methods?
         debmsg = "at step %d task %s is %s"
+
+        print "hyperperiod is %d" % self.hyper
         for i in range(self.hyper):
+            # setting all deadlines/periods and checking for deadlines
             for t in self.tasks():
-                # reset is done when the period expires
-                # but we must check if done when deadline expires
+                name = t['name']
+                # reset task when deadline expires
                 if t.is_deadline(i):
                     if not(t.is_done()):
-                        self.timeline.set_missed(i, t['name'])
+                        self.timeline.set_deadline(name)
+                        self.timeline.set_missed(name)
                         # we can stop calculating the timeline
-                        logging.debug(debmsg % (i, t['name'], "not runnable"))
-                        self.timeline.last = i + 1
+                        logging.debug(debmsg % (i, name, "not runnable"))
                         return False
-                    self.timeline.set_deadline(i, t['name'])
+
+                    self.timeline.set_deadline(name)
                     t.runnable = False
                     t.reset()
 
                 if t.is_period(i):
-                    self.timeline.set_period(i, t['name'])
+                    self.timeline.set_period(name)
                     # in the case period = deadline the variable runnable goes back to true
-                    logging.debug(debmsg % (i, t['name'], "runnable"))
+                    logging.debug(debmsg % (i, name, "runnable"))
                     t.runnable = True
-                    
-            cur_task = self.next_task() # should not need every time
-            if not(cur_task):
-                continue # just go to the next position on the timeline
 
+            cur_task = self.next_task()
+            if not(cur_task):
+                self.timeline.add_task("None")
+                continue # just go to the next position on the timeline
+        
             logging.debug("next task to schedule is %s" % cur_task['name'])
-            self.timeline[i] = cur_task['name']
+            self.timeline.add_task(cur_task['name'])
             cur_task.remaining -= 1
-        return True
+            
     
     def real_wcet(self, task):
         """ Computes the real wcet of task, given the timeline (works
