@@ -7,18 +7,20 @@ from math import ceil
 from rt_simulate import taskset_toini
 from schedu import Scheduler, Task
 
-MAXOFF = 5
-DEF_RM = False
-DEF_SCHED = True
-DEF_DENSITY = 5
-
-def gen_taskset(density = DEF_DENSITY,
-                rate_monotonic = DEF_RM, schedulable = DEF_SCHED):
+def gen_taskset(density, rate_monotonic, schedulable, harmonic):
     """ Generates a task set given the parameters """
     s = Scheduler()
     i = 0
+    if harmonic:
+        rate_monotonic = True
+        base = randrange(5)
+
     while True:
-        period = randrange(10, 20)
+        if harmonic:
+            period = base * randrange(10)
+        else:
+            period = randrange(10, 20)
+
         cost = int(ceil(float(period) / density))
 
         if rate_monotonic:
@@ -48,28 +50,31 @@ def usage():
 
 if __name__ == '__main__':
     try:
-        opts, args = getopt(argv[1:], "c:nhrd:")
+        opts, args = getopt(argv[1:], "c:nhrd:m")
     except GetoptError:
         usage()
         
     output = "test.conf"
-    sched = DEF_SCHED
-    rm = DEF_RM
-    dens = DEF_DENSITY
+    sched = True
+    rm = False
+    dens = 5
+    harm = False
 
     for o, a in opts:
-        if o == "-h":
+        if o == '-h':
             usage()
-        if o == "-c":
+        if o == '-c':
             output = a
-        if o == "-n":
+        if o == '-n':
             sched = False
-        if o == "-r":
+        if o == '-r':
             rm = True
-        if o == "-d":
+        if o == '-m':
+            harm = True
+        if o == '-d':
             dens = int(a)
     
-    tset = gen_taskset(schedulable = sched, rate_monotonic = rm, density = dens)
+    tset = gen_taskset(dens, sched, rm, harm)
     print "taskset\n %s" % str(tset)
     print "writing taskset to %s" % output
     taskset_toini(tset, output)

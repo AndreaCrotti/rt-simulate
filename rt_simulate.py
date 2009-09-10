@@ -3,6 +3,11 @@ import ConfigParser
 import sys, getopt, logging
 from string import strip
 
+try:
+    from termcolor import colored
+except ImportError:
+    print "output not colored"
+
 from schedu import *
 
 # TODO: adding colored output, see http://stackoverflow.com/questions/287871/print-in-terminal-with-colors-using-python
@@ -13,14 +18,7 @@ CONF_FILE = DEFAULTCONF
 VERBOSE = False
 GUI = False
 
-COLORS = {
-    "purple" : '\033[95m',
-    "blue" : '\033[94m',
-    "green" : '\033[92m',
-    "yellow" : '\033[93m',
-    "red" : '\033[91m',
-    "disable" : '\033[0m'
-    }
+# TODO: better using termcolor http://pypi.python.org/pypi/termcolor
 
 # a very simple logger
 logging.basicConfig(stream = sys.stdout)
