@@ -7,17 +7,19 @@ from math import ceil
 from rt_simulate import taskset_toini
 from schedu import Scheduler, Task
 
+MAXOFF = 5
+
 def gen_taskset(density, rate_monotonic, schedulable, harmonic):
     """ Generates a task set given the parameters """
     s = Scheduler()
     i = 0
     if harmonic:
         rate_monotonic = True
-        base = randrange(5)
+        base = randrange(1, 5)
 
     while True:
         if harmonic:
-            period = base * randrange(10)
+            period = base * randrange(1, 10)
         else:
             period = randrange(10, 20)
 
@@ -29,7 +31,7 @@ def gen_taskset(density, rate_monotonic, schedulable, harmonic):
             deadline = period + randrange(MAXOFF)
 
         name = "t" + str(i)
-        s.add_task(Task(name, cost, period, deadline))
+        s.add_task(Task(name, cost, period, deadline), reschedule = False)
         i += 1
         
         if s.utilisation_bound() > 1:
@@ -44,6 +46,8 @@ def usage():
     -n           :   creates a non schedulable task set
     -r           :   creates a rate monotonic task set
     -d           :   desired tasks number, 1=max tasks, 10= min tasks
+    -m           :   generates an harmonic task set,
+                     which is rate monotonic and where all the periods are multiple of a base number
     -h           :   prints this help
     """
     exit(0)

@@ -121,7 +121,7 @@ class Scheduler(object):
         self.task_dict = dict( (t['name'], t) for t in tasks)
         self.tasks = lambda : self.task_dict.values()
         self.name = name
-        self.setup()
+        self.refresh()
 
     def __str__(self):
         " Task set is only a dict of tasks initially "
@@ -138,7 +138,7 @@ class Scheduler(object):
         t = "TIMELINE:\n %s" % str(self.timeline)
         return '\n'.join([h, u, a, t]) + '\n\n'
 
-    def setup(self):
+    def refresh(self):
         logging.info("setting up the task\n")
         self.hyper = self.hyper_period()
         self.timeline = TimeLine(self.hyper) # faster methods?
@@ -165,9 +165,9 @@ class Scheduler(object):
         # should be only one
         logging.info("removing task %s" % task_name)
         self.task_dict.pop(task_name)
-        self.setup()
+        self.refresh()
 
-    def add_task(self, task):
+    def add_task(self, task, reschedule = True):
         name = task['name']
         if name in self.task_dict.keys():
             print "a task called %s is already present, not adding\n" % name
@@ -176,7 +176,8 @@ class Scheduler(object):
         logging.info("adding task %s" % name)
         self.task_dict[name] = task
         # FIXME: something missing here, priorities are not evaluated correctly
-        self.setup() # Too much effort recalculating everything every time??
+        if reschedule:
+            self.refresh() # Too much effort recalculating everything every time??
 
     def queue(self):
         """ Returning a sorted priority list of unfinished jobs """
@@ -193,6 +194,7 @@ class Scheduler(object):
 
     def schedule(self):
         """Finally schedule the task set, at this point priorities must be set already"""
+        self.refresh()
         cur_task = self.next_task()
         debmsg = "at step %d task %s is %s"
         for i in range(self.hyper):
