@@ -1,0 +1,32 @@
+2009-09-10  andrea crotti  <andrea.crotti.0@gmail.com>
+
+	* schedu.py: Now building the tiimeline only when really needed
+
+2009-09-10  andrea crotti  <andrea.crotti.0@gmail.com>
+
+	* gen_tasks.py (gen_taskset): Adding harmonic 
+
+2009-09-09  andrea crotti  <andrea.crotti.0@gmail.com>
+
+	* gen_tasks.py (gen_taskset): Density option
+
+2009-09-09  andrea crotti  <andrea.crotti.0@gmail.com>
+
+	* gen_tasks.py: More options and working opts parsing
+
+2009-09-08  andrea crotti  <andrea.crotti.0@gmail.com>
+
+	* schedu.py (Task.is_deadline): Fixed subtle bug in deadline checking
+
+2009-09-08  andrea crotti  <andrea.crotti.0@gmail.com>
+
+	* schedu.py (Scheduler.add_task): Adding check for tasks with the same name
+
+2009-09-08  andrea crotti  <andrea.crotti.0@gmail.com>
+
+	* gen_tasks.py: Adding possibility to automatically generate task set configuration files
+
+2009-09-07  andrea crotti  <andrea.crotti.0@gmail.com>
+
+	* schedu.py : Real wcet analysis in Timeline
+
