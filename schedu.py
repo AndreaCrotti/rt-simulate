@@ -2,6 +2,15 @@
 # -*- coding: utf-8 -*-
 # TODO: write a better error handling (exceptions)
 # TODO: analyze the wcet even on not schedulable tasks
+# FIXME: problem with WCET in this case
+#          ANALYZING taskset 
+# t2: 6, 27, 27    wcet: 6
+# t0: 2, 6, 6      wcet: 8
+# t1: 6, 27, 27    wcet: 18
+# HYPERPERIOD: 54
+# TOTAL UTILISATION BOUND: 0.778
+# ALGORITHM CHOSEN: rate monotonic
+
 import logging
 from copy import deepcopy
 from math import ceil
@@ -100,11 +109,8 @@ class TimeLine(object):
         " Setting the period end for the task task"
         self.timeline[idx]["period"].append(task)
 
-    def remove_task(self, task):
-        " Remove completely a task from the timeline"
-        pass
-
     def time(self, task):
+        " Returns the effective time that took to the task to be executed "
         t = deepcopy(task) # don't want to modify the original task
         for i in range(self.length):
             if t.is_done():
@@ -139,9 +145,8 @@ class Scheduler(object):
         return '\n'.join([h, u, a, t]) + '\n\n'
 
     def refresh(self):
-        logging.info("setting up the task\n")
+        logging.info("refreshing the taskset")
         self.hyper = self.hyper_period()
-        self.timeline = TimeLine(self.hyper) # faster methods?
         self.sort_key = self.select_algorithm()
         self.worst_case_analysis()
 
@@ -160,14 +165,13 @@ class Scheduler(object):
             self.algo = "rate monotonic"
             return "period" # using rate monotonic
     
-    # TODO: must also modify the deadline,
     def remove_task(self, task_name):
         # should be only one
         logging.info("removing task %s" % task_name)
         self.task_dict.pop(task_name)
         self.refresh()
 
-    def add_task(self, task, reschedule = True):
+    def add_task(self, task):
         name = task['name']
         if name in self.task_dict.keys():
             print "a task called %s is already present, not adding\n" % name
@@ -175,9 +179,7 @@ class Scheduler(object):
 
         logging.info("adding task %s" % name)
         self.task_dict[name] = task
-        # FIXME: something missing here, priorities are not evaluated correctly
-        if reschedule:
-            self.refresh() # Too much effort recalculating everything every time??
+        self.refresh()
 
     def queue(self):
         """ Returning a sorted priority list of unfinished jobs """
@@ -194,7 +196,7 @@ class Scheduler(object):
 
     def schedule(self):
         """Finally schedule the task set, at this point priorities must be set already"""
-        self.refresh()
+        self.timeline = TimeLine(self.hyper) # faster methods?
         cur_task = self.next_task()
         debmsg = "at step %d task %s is %s"
         for i in range(self.hyper):

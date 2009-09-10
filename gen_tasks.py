@@ -31,7 +31,7 @@ def gen_taskset(density, rate_monotonic, schedulable, harmonic):
             deadline = period + randrange(MAXOFF)
 
         name = "t" + str(i)
-        s.add_task(Task(name, cost, period, deadline), reschedule = False)
+        s.add_task(Task(name, cost, period, deadline))
         i += 1
         
         if s.utilisation_bound() > 1:

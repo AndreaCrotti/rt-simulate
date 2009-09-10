@@ -37,7 +37,7 @@ def parse_tasksets(config):
             except InputError:
                 logging.info("task %s is not correct" % (":".join([s, j])))
             else:
-                tset.add_task(task, reschedule = False)
+                tset.add_task(task)
         whole[s] = tset
     return whole
 
